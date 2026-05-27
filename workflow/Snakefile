@@ -18,6 +18,15 @@ all_outputs = []
 if config["get_references"]:
     all_outputs.append(get_refs_outputs)
 
+all_outputs = flatten(all_outputs)
+all_outputs = list(set(all_outputs))
+
+
+# --------------RULES-------------
+rule all:
+    input:
+        all_outputs,
+
 
 # -------------LOG AND ERROR HANDLING-------------
 onstart:

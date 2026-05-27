@@ -1,11 +1,13 @@
 # -------------PROJECT NAME------------- 
-project_name: "test_index"
+project_name: "test_index_1"
 
 # -------------PIPELINE RESOURCES-------------
 # Get References (download and unpack)
-accession_list: ".test/accession_list.txt"
-taxon_list: ".test/taxon_list.txt"
+accession_list: "resources/accession_list.txt"
+taxon_list: "resources/taxon_list.txt"
+header_names:
 
 #-------------RULES TO USE-------------
 
 get_references: True
+replace_headers: True
