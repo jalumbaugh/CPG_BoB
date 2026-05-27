@@ -4,34 +4,29 @@
 # in particular regarding the standardized folder structure mentioned there.
 
 
-# load configuration
-# -----------------------------------------------------
+# -------------LOAD CONFIG FILE-------------
 configfile: "config/config.yaml"
 
 
-# load rules
-# -----------------------------------------------------
-include: "rules/common.smk"
-include: "rules/process_reads.smk"
+# -------------STEPS TO INCLUDE-------------
+# include: "rules/common.smk"
+include: "rules/1_get_refs.smk"
 
 
-# optional messages, log and error handling
-# -----------------------------------------------------
+all_outputs = []
+
+if config["get_references"]:
+    all_outputs.append(get_refs_outputs)
+
+
+# -------------LOG AND ERROR HANDLING-------------
 onstart:
-    print("\n--- Analysis started ---\n")
+    print("\n--- Database build started ---\n")
 
 
 onsuccess:
-    print("\n--- Workflow finished! ---\n")
+    print("\n--- Index complete! ---\n")
 
 
 onerror:
-    print("\n--- An error occurred! ---\n")
-
-
-# target rules
-# -----------------------------------------------------
-rule all:
-    default_target: True
-    input:
-        "results/multiqc/multiqc_report.html",
+    print("\n--- An error has occurred. ---\n")

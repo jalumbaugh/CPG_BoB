@@ -1,3 +1,13 @@
+# metaMatie
+A  bowtie2 index building companion for metaJAM in SnakeMake
+
+##Setup
+
+Before starting the workflow:
+* from the metaMatie main directory, run ```conda env create -f workflow/envs/metaMatie_env.yaml```
+* then activate the environment ```conda activate metaMatie_env```
+
+
 # Snakemake workflow: `<name>`
 
 [![Snakemake](https://img.shields.io/badge/snakemake-≥8.0.0-brightgreen.svg)](https://snakemake.github.io)

@@ -1,8 +1,10 @@
-sample_sheet: "config/samples.tsv"
+# -------------IDEX NAME-------------
+project_name: "test_index"
+# -------------PIPELINE RESOURCES-------------
+# Get References (download and unpack)
+accession_list: ".test/accession_list.txt"
+taxon_list: ".test/taxon_list.txt"
 
-get_genome:
-  ncbi_ftp: https://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/000/146/045/GCF_000146045.2_R64/GCF_000146045.2_R64_genomic.fna.gz
+#-------------RULES TO USE-------------
 
-simulate_reads:
-  read_length: 100
-  read_number: 10000
+get_references: True

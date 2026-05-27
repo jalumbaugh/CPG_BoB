@@ -1,4 +1,4 @@
-# Changelog
+# Changelog for SnakeMake Template
 
 ## [1.3.0](https://github.com/snakemake-workflows/snakemake-workflow-template/compare/v1.2.0...v1.3.0) (2026-03-27)
 

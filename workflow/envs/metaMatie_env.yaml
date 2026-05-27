@@ -1,0 +1,17 @@
+name: metaMatie_env
+channel-priority: flexible
+channels:
+  - conda-forge
+  - bioconda
+  - nodefaults
+dependencies:
+  - snakemake=9.14.6
+  - python=3.13.12
+  - gzip=1.14
+  - wget=1.21.4
+  - ncbi-datasets-cli=18.28.0
+  - bowtie2=2.5.5
+  - samtools=1.20
+  - bedtools=2.31.1
+  - pigz=2.8
+  - pandas=3.0.2
