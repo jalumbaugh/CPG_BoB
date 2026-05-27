@@ -32,6 +32,10 @@ get_refs_outputs += expand(
     "logs/user_record/{project_name}_get_references.log",
     project_name=config["project_name"],
 )
+get_refs_outputs += expand(
+    "build/acc2taxid/{project_name}_acc2taxid_lookup.tsv",
+    project_name=config["project_name"],
+)
 
 
 # --------------RULES-------------
@@ -101,6 +105,27 @@ rule unpack_references:
         """
         fna_file=$(unzip -Z1 {input} '*.fna' | head -n1)
         unzip -p {input} "$fna_file" >{output} 2>{log}
+        """
+
+
+all_accessions = list(accessions)
+
+for taxon in taxa:
+    taxon_file = f"build/download/{taxon}.txt"
+    with open(taxon_file, "r") as fhin:
+        all_accessions.extend(line.strip() for line in fhin if line.strip())
+
+
+# make a list of downloaded accessions for use in 3_acc2taxid_build.smk
+rule accessions_for_acc2taxid:
+    input:
+        expand("build/download/{taxon}.txt", taxon=taxa),
+    output:
+        "build/acc2taxid/{project_name}_acc2taxid_lookup.tsv",
+    shell:
+        """
+        datasets summary genome accession {all_accessions} --as-json-lines \
+            | dataformat tsv genome --fields accession,organism-tax-id,organism-name >{output}
         """
 
 
