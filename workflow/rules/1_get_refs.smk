@@ -2,13 +2,6 @@
 
 import os
 
-# -------------LIST OUTPUTS-------------
-get_refs_outputs = []
-get_refs_outputs.append("build/download/{accession}.zip")
-get_refs_outputs.append("build/download/{taxon}.txt")
-get_refs_outputs.append("build/download/{taxon}.zip")
-get_refs_outputs.append("build/unpack/{reference}.fna")
-
 # -------------LOAD INPUT LISTS-------------
 accessions = []
 taxa = []
@@ -30,15 +23,18 @@ wildcard_constraints:
     taxon="|".join(taxa),
 
 
-rule all:
-    input:
-        expand("build/unpack/{reference}.fna", reference=accessions + taxa),
-        expand(
-            "logs/user_record/{project_name}_get_references.log",
-            project_name=config["project_name"],
-        ),
+# -------------LIST OUTPUTS-------------
+get_refs_outputs = []
+get_refs_outputs += expand(
+    "build/download/{reference}.fna", reference=accessions + taxa
+)
+get_refs_outputs += expand(
+    "logs/user_record/{project_name}_get_references.log",
+    project_name=config["project_name"],
+)
 
 
+# --------------RULES-------------
 # download from accessions list
 rule download_accessions:
     output:
@@ -65,7 +61,6 @@ rule select_best_acc_from_taxa:
         """
         t=$(echo {wildcards.taxon} | tr '_' ' ')
         datasets summary genome taxon "$t" \
-            --assembly-source refseq \
             --as-json-lines \
             | dataformat tsv genome --fields accession,assmstats-contig-n50,assminfo-refseq-category \
             | awk -F'\t' 'NR>1 && $2 != "" && tolower($3)=="reference genome" {{print $1 "\t" $2}}' \
@@ -76,6 +71,7 @@ rule select_best_acc_from_taxa:
         """
 
 
+# download the best reference genome
 rule download_best_acc_for_taxa:
     input:
         "build/download/{taxon}.txt",
@@ -89,15 +85,16 @@ rule download_best_acc_for_taxa:
         datasets download genome accession --inputfile {input} \
             --include genome \
             --filename {output[0]} 2>{log}
-        echo "Downloaded accession {wildcards.taxon}: $(cat {input}) at $(date)" >{output[1]}
+        echo "Downloaded best accession for {wildcards.taxon}: $(cat {input}) at $(date)" >{output[1]}
         """
 
 
+# unpack the fasta files from the downloaded NCBI zip files
 rule unpack_references:
     input:
         "build/download/{reference}.zip",
     output:
-        "build/unpack/{reference}.fna",
+        "build/download/{reference}.fna",
     log:
         "logs/unpack_references/{reference}.log",
     shell:
@@ -107,6 +104,7 @@ rule unpack_references:
         """
 
 
+# make a concatonated log file for this
 rule cat_logs:
     input:
         expand("logs/user_record/timestamped_{ref}.txt", ref=accessions + taxa),
