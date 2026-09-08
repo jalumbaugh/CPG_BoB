@@ -35,6 +35,7 @@ onstart:
 
 onsuccess:
     print("\n--- Index complete! ---\n")
+    shell("find build/download -name '*.fna' -empty -delete")
 
 
 onerror:
