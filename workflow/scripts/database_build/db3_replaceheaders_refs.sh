@@ -31,7 +31,7 @@ acc_base=${acc%%.*}                           # drop .1 -> 000690835
 sample_name="${acc_base}_${rest}_"            # 000690835_Fulmarusglacialis_
 
 #This adds the sample name info to start building a MAP file for db4, need to manually add taxaID from NCBI in second column
-echo "${acc_base}_${rest}" >> "$OUTPUT_DIR/acc2taxid_${TAXA}_headers.tsv"
+echo "${acc_base}_${rest}" >> "$OUTPUT_DIR/acc2taxid_${TAXA}_headers.tsv" 
 
 # Extract contig IDs (first token after '>') to contigs_txt
 awk '/^>/ { h=substr($0,2); split(h,a,/[^[:alnum:]_.:-]+/); print a[1]; next }' "$input_file" > "$header_files/${sample_name}contigs.txt"
