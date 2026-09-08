@@ -5,7 +5,7 @@
 
 
 # -------------LOAD CONFIG FILE-------------
-configfile: "config/config.yaml"
+configfile: "/home/jla/BASE/projects/metaMatie/config/config.yaml"
 
 
 # -------------STEPS TO INCLUDE-------------
