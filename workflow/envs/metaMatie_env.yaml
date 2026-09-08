@@ -5,7 +5,7 @@ channels:
   - bioconda
   - nodefaults
 dependencies:
-  - snakemake=9.14.6
+  - snakemake
   - python=3.13.12
   - gzip=1.14
   - wget=1.21.4
@@ -14,4 +14,4 @@ dependencies:
   - samtools=1.20
   - bedtools=2.31.1
   - pigz=2.8
-  - pandas=3.0.2
+  - pandas
