@@ -45,6 +45,9 @@ get_refs_2_outputs += expand(
     "build/download/{taxon}.fna",
     taxon=valid_taxa
 )
+get_refs_2_outputs += [
+    "logs/check_duplicate_second_lines/checked.ok"
+]
 
 # -------------RULES-------------
 rule download_accessions:
@@ -106,3 +109,42 @@ rule download_best_acc_for_taxa:
         """
 
 ruleorder: download_best_acc_for_taxa > download_accessions
+
+rule check_duplicate_second_lines:
+    input:
+        expand("build/download/{accession}.fna", accession=accessions),
+        expand("build/download/{taxon}.fna", taxon=valid_taxa)
+    output:
+        touch("logs/check_duplicate_second_lines/checked.ok")
+    log:
+        "logs/check_duplicate_second_lines/warnings.txt"
+    run:
+        import os
+
+        os.makedirs("logs/check_duplicate_second_lines", exist_ok=True)
+
+        seen = {}
+        duplicates = []
+
+        with open(log[0], "w") as fout:
+            for f in input:
+                if not os.path.exists(f) or os.path.getsize(f) == 0:
+                    continue
+
+                with open(f) as fin:
+                    first_line = fin.readline().rstrip("\n")
+                    second_line = fin.readline().rstrip("\n")
+
+                if second_line in seen:
+                    duplicates.append((f, seen[second_line], second_line))
+                    fout.write(
+                        f"ERROR: {f} and {seen[second_line]} share the same second line: {second_line}\n"
+                    )
+                else:
+                    seen[second_line] = f
+
+        if duplicates:
+            raise ValueError("DUPLICATE FILES DETECTED! See logs/check_duplicate_second_lines/warnings.txt")
+
+
+

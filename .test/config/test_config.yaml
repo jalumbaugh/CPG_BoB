@@ -3,8 +3,8 @@ project_name: "BoB_test"
 
 # -------------PIPELINE RESOURCES-------------
 # Get References (download and unpack)
-accession_list: "/.test/accession_list.txt"
-taxon_list: "/.test/taxon_list.txt"
+accession_list: ".test/accession_list.txt"
+taxon_list: ".test/taxon_list.txt"
 
 #-------------RULES TO USE-------------
 
@@ -15,9 +15,9 @@ taxon_list: "/.test/taxon_list.txt"
 #If you want, you can head over to https://www.ncbi.nlm.nih.gov/datasets/genome/ to find related references at a higher taxonomic level.
 #Add those reference accessions to your accession_list.txt file before proceeding to get_references_stage2 and the other steps.
 #Finally: DO NOT DELETE the contents of acc2taxid/accessions until you are done with the entire database build.
-get_references_stage1: True
+get_references_stage1: False
 
-get_references_stage2: False
+get_references_stage2: True
 
 replace_headers: False
 

@@ -10,21 +10,26 @@ if os.path.exists(config["taxon_list"]):
         for line in fhin:
             taxa.append(line.rstrip())
 
+
 #-------------WILDCARD CONSTRAINTS-------------
 wildcard_constraints:
     taxon="|".join(re.escape(t) for t in taxa) if taxa else "(?!)"
 
 # -------------LIST OUTPUTS-------------
 get_refs_1_outputs = []
-get_refs_1_outputs = expand(
+get_refs_1_outputs += expand(
     "build/acc2taxid/accessions/{taxon}.txt",
     taxon=taxa
+)
+get_refs_1_outputs += expand(
+    "build/acc2taxid/{project_name}_accfromtax_report.tsv",
+    project_name=[config["project_name"]],
 )
 
 # -------------RULES-------------
 rule select_best_acc_from_taxa:
     output:
-        "build/acc2taxid/accessions/{taxon}.txt"
+        "build/acc2taxid/accessions/{taxon}.txt",
     log:
         "logs/select_best_acc_from_taxa/{taxon}.log"
     shell:
@@ -46,4 +51,35 @@ rule select_best_acc_from_taxa:
         echo "Selected accession: $(cat {output:q})" >> {log:q}
         """
 
+rule acc_from_taxa_report:
+    input:
+        expand("build/acc2taxid/accessions/{taxon}.txt", taxon=taxa)
+    output:
+        "build/acc2taxid/{project_name}_accfromtax_report.tsv"
+    shell:
+        r"""
+        > {output:q}
+
+        for i in {input:q}; do
+            taxon=$(basename "$i" .txt)
+
+            if [[ -s "$i" ]]; then
+                echo "$taxon= $(cat "$i")" >> {output:q}
+            else
+                echo "$taxon= no NCBI accession found" >> {output:q}
+            fi
+        done
+
+        for i in {input:q}; do
+            for j in {input:q}; do
+                if [[ "$i" < "$j" ]]; then
+                    if [[ -s "$i" && -s "$j" ]]; then
+                        if cmp -s "$i" "$j"; then
+                            echo "WARNING! These files share the same accession: $i $j" >> {output:q}
+                        fi
+                    fi
+                fi
+            done
+        done
+        """
 

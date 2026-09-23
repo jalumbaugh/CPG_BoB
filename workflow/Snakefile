@@ -1,7 +1,7 @@
 # Main entrypoint of the workflow.
 
 # -------------LOAD CONFIG FILE-------------
-configfile: "config/config.yaml"
+configfile: "/config/config.yaml"
 
 
 # -------------STEPS TO INCLUDE-------------
@@ -42,7 +42,8 @@ onstart:
 
 onsuccess:
     print("\n--- YES! WE! CAN!!! Tasks complete. ---\n")
-    shell("find build/download -name '*.fna' -empty -delete")
+    if config.get("1_get_refs_stage2.smk", False):
+        shell("find build/download -name '*.fna' -empty -delete || true")
 
 
 onerror:
