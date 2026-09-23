@@ -1,57 +1,86 @@
 # 2. Replace the headers in the raw reference fasta files with the accession name
 import os
+import re
 
-# -------------LOAD INPUT LISTS-------------
+#-------------INPUT LISTS-------------
 accessions = []
-taxa = []
-
 if os.path.exists(config["accession_list"]):
     with open(config["accession_list"], "r") as fhin:
         for line in fhin:
             accessions.append(line.rstrip())
 
+taxa = []
 if os.path.exists(config["taxon_list"]):
     with open(config["taxon_list"], "r") as fhin:
         for line in fhin:
             taxa.append(line.rstrip())
 
+valid_taxa = []
+for taxon in taxa:
+    path = f"build/acc2taxid/accessions/{taxon}.txt"
+    if os.path.exists(path):
+        with open(path) as fh:
+            accession = fh.read().strip()
+        if accession:
+            valid_taxa.append(taxon)
 
-# -------------WILDCARD CONSTRAINTS-------------
+references = accessions + valid_taxa
+
+#-------------WILDCARD CONSTRAINTS-------------
 wildcard_constraints:
-    accession="|".join(accessions),
-    taxon="|".join(taxa),
+    reference="|".join(re.escape(r) for r in references) if references else "(?!)"
 
-
-# -------------LIST OUTPUTS-------------
-replace_headers = []
-replace_headers += expand("build/download/{reference}.fna", reference=accessions + taxa)
-replace_headers += expand(
-    "logs/user_record/{project_name}_get_references.log",
-    project_name=config["project_name"],
+#-------------LIST OUTPUTS-------------
+replace_headers_outputs = []
+replace_headers_outputs += expand(
+    "build/download/{reference}_orig.contigs.txt",
+    reference=references
 )
-replace_headers += expand(
-    "build/acc2taxid/{project_name}_acc2taxid_lookup.tsv",
-    project_name=config["project_name"],
+replace_headers_outputs += expand(
+    "build/new_headers/{reference}.fna",
+    reference=references
+)
+replace_headers_outputs += expand(
+    "logs/orig_headers/{reference}_orig.contigs.log",
+    reference=references
+)
+replace_headers_outputs += expand(
+    "logs/new_headers/{reference}_new_headers.log",
+    reference=references
 )
 
-
-# --------------RULES-------------
-
-
-# Use acc2taxid_lookup.tsv to find
-rule list_ref_headers:
+#--------------RULES-------------
+rule extract_contigs:
     input:
-        "build/download/{reference}.fna",
+        "build/download/{reference}.fna"
     output:
-        temp("build/acc2taxid/{reference}_headers.tsv"),
+        "build/download/{reference}_orig.contigs.txt"
     log:
-        "logs/list_ref_headers/{reference}_headers.log",
+        "logs/orig_headers/{reference}_orig.contigs.log"
     shell:
         """
-        awk -v s="{reference}" '/^>/ { h=substr($0,2); split(h,a,/ /); print s a[1] }' "$input_file" >"$header_files/${sample_name}new_headers.txt"
+        awk '/^>/ {{ h=substr($0,2); split(h,a,/[^[:alnum:]_.:-]+/); print a[1]; next }}' "{input}" > "{output}"
+        echo "Original headers extracted from {wildcards.reference} to {output}" > "{log}"
+        """
 
-        datasets download genome accession {wildcards.accession} \
-            --include genome \
-            --filename {output[0]} >{log} 2>&1
-        echo "Downloaded accession {wildcards.accession} at $(date)" >{output[1]}
+rule replace_new_headers:
+    input:
+        fasta="build/download/{reference}.fna"
+    output:
+        fasta="build/new_headers/{reference}.fna"
+    log:
+        "logs/new_headers/{reference}_new_headers.log"
+    shell:
+        """
+        awk -v s="{wildcards.reference}" '
+        /^>/ {{
+            header = substr($0,2)
+            split(header, a, /[[:space:]]+/)
+            contig = a[1]
+            print ">" s "_" contig
+            next
+        }}
+        {{ print }}
+        ' "{input.fasta}" > "{output.fasta}"
+        echo "New headers made for {wildcards.reference} in {output.fasta}" > "{log}"
         """
