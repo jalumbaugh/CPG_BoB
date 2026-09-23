@@ -1,22 +1,29 @@
 # Main entrypoint of the workflow.
-# Please follow the best practices:
-# https://snakemake.readthedocs.io/en/stable/snakefiles/best_practices.html,
-# in particular regarding the standardized folder structure mentioned there.
-
 
 # -------------LOAD CONFIG FILE-------------
-configfile: "/home/jla/BASE/projects/metaMatie/config/config.yaml"
+configfile: "config/config.yaml"
 
 
 # -------------STEPS TO INCLUDE-------------
-# include: "rules/common.smk"
-include: "rules/1_get_refs.smk"
+include: "rules/1_get_refs_stage1.smk"
+include: "rules/1_get_refs_stage2.smk"
+include: "rules/2_replace_headers.smk"
+include: "rules/3_acc2taxid_build.smk"
 
 
 all_outputs = []
 
-if config["get_references"]:
-    all_outputs.append(get_refs_outputs)
+if config["get_references_stage1"]:
+    all_outputs.append(get_refs_1_outputs)
+
+if config["get_references_stage2"]:
+    all_outputs.append(get_refs_2_outputs)
+    
+if config["replace_headers"]:
+    all_outputs.append(replace_headers_outputs)
+
+if config["build_acc2taxid"]:
+    all_outputs.append(build_acc2taxid_outputs)
 
 all_outputs = flatten(all_outputs)
 all_outputs = list(set(all_outputs))
@@ -30,13 +37,14 @@ rule all:
 
 # -------------LOG AND ERROR HANDLING-------------
 onstart:
-    print("\n--- Database build started ---\n")
+    print("\n--- Can we build it? Database build started... ---\n")
 
 
 onsuccess:
-    print("\n--- Index complete! ---\n")
+    print("\n--- Yes, we can! Tasks complete. ---\n")
     shell("find build/download -name '*.fna' -empty -delete")
 
 
 onerror:
-    print("\n--- An error has occurred. ---\n")
+    print("\n--- No, we can't... An error has occurred. ---\n")
+
