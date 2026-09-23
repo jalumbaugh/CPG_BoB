@@ -25,9 +25,12 @@ GCA_036687305.1
 * The default config is in `config/config.yml`.
 * Put the list paths into your config file under PIPELINE RESOURCES.
 * Don't forget to change the `project_name` to whatever you want your index to be called.
-* Select the rules to use. Always start with get_references_stage1 as true and the other rules as false.
+* Select the rules to use.
+*   > [!NOTE] If you are using an taxon list as input, you must first run `get_references_stage1= True` with all the other rules as `= False` before doing anything else.
+    > Once you have ran  `get_references_stage1`, run `ls -lhrt build/acc2taxid/accessions` in your terminal. Taxa with a size as 0 did not have an accession ID on NCBI.
+    > Add those reference accessions to your accession_list.txt file before proceeding to get_references_stage2 and the other steps. 
 
-> [!NOTE]
+
 
 # Snakemake workflow: `<name>`
 
