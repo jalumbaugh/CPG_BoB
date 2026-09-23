@@ -1,0 +1,28 @@
+# -------------PROJECT NAME------------- 
+project_name: "BoB_test"
+
+# -------------PIPELINE RESOURCES-------------
+# Get References (download and unpack)
+accession_list: "/.test/accession_list.txt"
+taxon_list: "/.test/taxon_list.txt"
+
+#-------------RULES TO USE-------------
+
+#Run get_references_stage1 by itself first. It will find the best accessions for your taxa in taxon_list. 
+#After it completes, run this in your terminal:
+#     ls -lhrt build/acc2taxid/accessions
+#The files with 0 as their size were not found on NCBI. 
+#If you want, you can head over to https://www.ncbi.nlm.nih.gov/datasets/genome/ to find related references at a higher taxonomic level.
+#Add those reference accessions to your accession_list.txt file before proceeding to get_references_stage2 and the other steps.
+#Finally: DO NOT DELETE the contents of acc2taxid/accessions until you are done with the entire database build.
+get_references_stage1: True
+
+get_references_stage2: False
+
+replace_headers: False
+
+#If you have decided to replace your headers, you must leave replace_headers as True when running build_acc2taxid and build_bowtie_index.
+build_acc2taxid: False
+
+#You can run build_bowtie_index immediately if you feel brave, or run it separately once you are happy with your database.
+build_bowtie_index: False
