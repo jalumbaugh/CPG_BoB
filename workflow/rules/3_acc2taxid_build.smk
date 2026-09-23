@@ -1,96 +1,126 @@
 # 3. Build acc2taxid file
 
 import os
+import re
 
 # -------------LOAD INPUT LISTS-------------
 accessions = []
-taxa = []
-
 if os.path.exists(config["accession_list"]):
     with open(config["accession_list"], "r") as fhin:
         for line in fhin:
             accessions.append(line.rstrip())
 
+taxa = []
 if os.path.exists(config["taxon_list"]):
     with open(config["taxon_list"], "r") as fhin:
         for line in fhin:
             taxa.append(line.rstrip())
 
+valid_taxa = []
+for taxon in taxa:
+    path = f"build/acc2taxid/accessions/{taxon}.txt"
+    if os.path.exists(path):
+        with open(path) as fh:
+            accession = fh.read().strip()
+        if accession:
+            valid_taxa.append(taxon)
+
+references = accessions + valid_taxa
 
 # -------------WILDCARD CONSTRAINTS-------------
 wildcard_constraints:
-    accession="|".join(accessions),
-    taxon="|".join(taxa),
-
+    reference="|".join(re.escape(r) for r in references) if references else "(?!)"
 
 # -------------LIST OUTPUTS-------------
-build_acc2taxid = []
-build_acc2taxid += expand(
+build_acc2taxid_outputs = []
+build_acc2taxid_outputs += expand(
     "build/acc2taxid/{project_name}_acc2taxid.tsv",
-    project_name=config["project_name"],
+    project_name=[config["project_name"]],
+)
+build_acc2taxid_outputs += expand(
+    "build/acc2taxid/{project_name}_acc2taxid_lookup.tsv",
+    project_name=[config["project_name"]],
 )
 
+# -------------CHOOSE REFERENCE FASTA SOURCE-------------
+if config["replace_headers"]:
+    ref_fasta_pattern = "build/new_headers/{reference}.fna"
+else:
+    ref_fasta_pattern = "build/download/{reference}.fna"
 
-# --------------RULES-------------
-# list headers in references, and put in both 1st and 2nd column of acc2taxid file named after reference fna
 rule list_ref_headers:
     input:
-        "build/download/{reference}.fna",
+        ref_fasta_pattern
     output:
-        temp("build/acc2taxid/{reference}_headers.tsv"),
+        temp("build/acc2taxid/{reference}_headers.tsv")
     log:
-        "logs/list_ref_headers/{reference}_headers.log",
+        "logs/list_ref_headers/{reference}_headers.log"
     shell:
         """
-        awk -v s="{reference}" '/^>/ { h=substr($0,2); split(h,a,/ /); print s a[1] }' {input} >{output} 2>{log}
-        awk -F"\t" 'BEGIN{OFS="\t"} {print $1, $0}' {output}
+        awk -v s="{wildcards.reference}" '/^>/ {{h=substr($0,2); split(h,a,/[^[:alnum:]_.:-]+/); print a[1]"\t"s}}' {input} > {output} 2> {log}
         """
 
 
-# Add a third column with the taxids. One rule for accessions, one for taxon named files.
+# make a list of downloaded accessions for use in 3_acc2taxid_build.smk
+rule lookup_for_acc2taxid:
+    input:
+        taxon_files=expand("build/acc2taxid/accessions/{taxon}.txt", taxon=taxa)
+    output:
+        "build/acc2taxid/{project_name}_acc2taxid_lookup.tsv"
+    params:
+        all_accessions=lambda wildcards, input: accessions
+        + [
+            acc.strip()
+            for taxon_file in input.taxon_files
+            for acc in open(taxon_file)
+            if acc.strip()
+        ]
+    shell:
+        """
+        datasets summary genome accession {params.all_accessions} --as-json-lines \
+            | dataformat tsv genome --fields accession,organism-tax-id,organism-name > {output}
+        """
+
+
 rule add_taxids_accession:
     input:
-        "build/acc2taxid/{accession}_headers.tsv",
-        "build/acc2taxid/{project_name}_acc2taxid_lookup.txt",
+        headers="build/acc2taxid/{accession}_headers.tsv",
+        lookup=f"build/acc2taxid/{config['project_name']}_acc2taxid_lookup.tsv",
     output:
         temp("build/acc2taxid/{accession}_acc2taxid.tsv"),
     log:
         "logs/add_taxids/{accession}_acc2taxid.tsv",
     shell:
         """
-        cp {input[0]} {output}
-        awk -F"\t" 'BEGIN{{OFS="\t"}} FNR==NR{{tax[$1]=$2; next}} {{print $1, $2, tax[$1]}}' {input[1]} {input[0]} >{output} 2>{log}
+        awk -F"\t" 'BEGIN{{OFS="\t"}} FNR==NR{{if(FNR>1){{taxid[$1]=$2; name[$1]=$3}}; next}} {{print $1, taxid[$2], name[$2]}}' {input.lookup} {input.headers} >{output} 2>{log}
         """
-
 
 rule add_taxids_taxon:
     input:
-        "build/acc2taxid/{taxon}_headers.tsv",
-        "build/acc2taxid/{project_name}_acc2taxid_lookup.txt",
+        headers="build/acc2taxid/{taxon}_headers.tsv",
+        taxon_acc="build/acc2taxid/accessions/{taxon}.txt",
+        lookup=f"build/acc2taxid/{config['project_name']}_acc2taxid_lookup.tsv",
     output:
         temp("build/acc2taxid/{taxon}_acc2taxid.tsv"),
     log:
         "logs/add_taxids/{taxon}_acc2taxid.tsv",
     shell:
         """
-        cp {input[0]} {output}
-        awk -F"\t" 'BEGIN{{OFS="\t"}} FNR==NR{{tax[$3]=$2; next}} {{print $1, $2, tax[$3]}}' {input[1]} {input[0]} >{output} 2>{log}
+        acc=$(cat {input.taxon_acc})
+        awk -F"\t" -v acc="$acc" 'BEGIN{{OFS="\t"}} FNR==NR{{if(FNR>1){{taxid[$1]=$2; name[$1]=$3}}; next}} {{print $1, taxid[acc], name[acc]}}' {input.lookup} {input.headers} >{output} 2>{log}
         """
 
 
 rule cat_acc2taxid:
     input:
-        expand("build/acc2taxid/{reference}_acc2taxid.tsv", reference=accessions + taxa),
+        expand("build/acc2taxid/{reference}_acc2taxid.tsv", reference=references)
     output:
-        "build/acc2taxid/{project_name}_acc2taxid.tsv",
+        "build/acc2taxid/{project_name}_acc2taxid.tsv"
     log:
-        "logs/cat_acc2taxid/{project_name}_acc2taxid.tsv",
+        "logs/cat_acc2taxid/{project_name}_acc2taxid_complete.tsv"
     shell:
         """
-        cat {input} >{output} 2>{log}
+        cat {input} | awk -F"\t" 'BEGIN{{OFS="\t"}} {{print $1, $0}}' > {output} 2> {log}
         """
 
-
-# this rule needs to:
-# copy the contents of {accession}_headers.tsv to {output}, then
-# look for the {accession} in the first column of acc2taxid_lookup.txt and add the corresponding 2nd column to the 3rd column of {output}
+ruleorder: add_taxids_taxon > add_taxids_accession
