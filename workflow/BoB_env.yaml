@@ -1,4 +1,4 @@
-name: metaMatie_env
+name: BoB_env
 channel-priority: flexible
 channels:
   - conda-forge
