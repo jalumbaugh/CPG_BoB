@@ -1,12 +1,33 @@
-# metaMatie
-A  bowtie2 index building companion for metaJAM in SnakeMake
+# **CPG_BoB**
+Centre for Palaeogenetics Builder for Bowtie2: 
+A  bowtie2 index building companion in SnakeMake
 
-##Setup
+# Setup: Before starting the workflow
+<b>Set up the environment for BoB:</b>
+* from the CPG_BoB main directory, run `conda env create -f workflow/envs/BoB_env.yaml`
+* then activate the environment `conda activate BoB_env`
 
-Before starting the workflow:
-* from the metaMatie main directory, run ```conda env create -f workflow/envs/metaMatie_env.yaml```
-* then activate the environment ```conda activate metaMatie_env```
+<b>Build your taxon and/or accession input files</b>
+* you can add any taxon you are interested to your taxon list, as BoB will not fail if no accession exists.
+* the taxon list should be formatatted like this, with underscores between the genus and species names:
+```
+Lepidocyrtus_curvicollis
+Drosophila_melanogaster
+```
+* the accession list should be formatatted like this.
+```
+GCA_036971115.1
+GCA_036687305.1
+```
+* examples of the input lists can be found under `.test`.
 
+<b>Complete the config file</b>
+* The default config is in `config/config.yml`.
+* Put the list paths into your config file under PIPELINE RESOURCES.
+* Don't forget to change the `project_name` to whatever you want your index to be called.
+* Select the rules to use. Always start with get_references_stage1 as true and the other rules as false.
+
+> [!NOTE]
 
 # Snakemake workflow: `<name>`
 
