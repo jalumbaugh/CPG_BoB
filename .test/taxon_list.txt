@@ -1,3 +1,3 @@
-Haliaeetus_albicilla
-Anas_acuta
+Lepidocyrtus_curvicollis
+Drosophila_melanogaster
 Hyla_arborea
