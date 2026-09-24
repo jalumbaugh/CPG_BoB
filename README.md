@@ -70,10 +70,12 @@ GCA_036687305.1
       * refseq only
 
 ### Author
-Jamie Alumbaugh
+Jamie Alumbaugh <br>
 Centre for Palaeogenetics, Stockholm
  
 ### Ackowledgements
-Special thanks to NBIS (National Bioinformatics Infrastructure Sweden) for their Snakemake BYOC (bring-your-own-code) Workshop of Spring 2026.
+Special thanks to NBIS (National Bioinformatics Infrastructure Sweden) for their Snakemake BYOC (bring-your-own-code) Workshop of Spring 2026. 
+
 The basic github framework of this pipeline is based on [this template](https://github.com/snakemake-workflows/snakemake-workflow-template).
+
 This pipeline was also developed with documentation search and coding assistance from [Snakemake Guru AI](https://snakemake.readthedocs.io/en/stable/#).

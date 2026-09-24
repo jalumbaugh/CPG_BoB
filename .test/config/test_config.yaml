@@ -17,7 +17,7 @@ taxon_list: ".test/taxon_list.txt"
 #Finally: DO NOT DELETE the contents of acc2taxid/accessions until you are done with the entire database build.
 get_references_stage1: False
 
-get_references_stage2: True
+get_references_stage2: False
 
 replace_headers: False
 
