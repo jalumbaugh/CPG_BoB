@@ -1,6 +1,6 @@
 # **CPG_BoB**
 Centre for Palaeogenetics Builder for Bowtie2: 
-A  bowtie2 index building companion in SnakeMake
+A bowtie2 index building companion in SnakeMake for large metagenomic databases
 
 [![Snakemake](https://img.shields.io/badge/snakemake-≥8.0.0-brightgreen.svg)](https://snakemake.github.io)
 
@@ -68,6 +68,12 @@ GCA_036687305.1
       * highest assmstats-contig-l50
       * most recent assminfo-release-date
       * refseq only
+
+### Author
+Jamie Alumbaugh
+Centre for Palaeogenetics, Stockholm
  
-### Assistance Ackowledgement
-This pipeline was made with the help of [Snakemake Guru AI](https://snakemake.readthedocs.io/en/stable/#)
+### Ackowledgements
+Special thanks to NBIS (National Bioinformatics Infrastructure Sweden) for their Snakemake BYOC (bring-your-own-code) Workshop of Spring 2026.
+The basic github framework of this pipeline is based on [this template](https://github.com/snakemake-workflows/snakemake-workflow-template).
+This pipeline was also developed with documentation search and coding assistance from [Snakemake Guru AI](https://snakemake.readthedocs.io/en/stable/#).

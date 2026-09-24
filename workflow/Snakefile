@@ -1,7 +1,7 @@
 # Main entrypoint of the workflow.
 
 # -------------LOAD CONFIG FILE-------------
-configfile: "/config/config.yaml"
+configfile: "config/config.yaml"
 
 
 # -------------STEPS TO INCLUDE-------------
