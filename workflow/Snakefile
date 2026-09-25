@@ -1,24 +1,25 @@
 # Main entrypoint of the workflow.
 
+
 # -------------LOAD CONFIG FILE-------------
 configfile: "config/config.yaml"
 
 
 # -------------STEPS TO INCLUDE-------------
-include: "rules/1_get_refs_stage1.smk"
-include: "rules/1_get_refs_stage2.smk"
-include: "rules/2_replace_headers.smk"
-include: "rules/3_acc2taxid_build.smk"
+include: "rules/1_acc_from_taxa.smk"
+include: "rules/2_download_refs.smk"
+include: "rules/3_replace_headers.smk"
+include: "rules/4_acc2taxid_build.smk"
 
 
 all_outputs = []
 
-if config["get_references_stage1"]:
-    all_outputs.append(get_refs_1_outputs)
+if config["get_accessions_from_taxa"]:
+    all_outputs.append(acc_from_taxa_outputs)
 
-if config["get_references_stage2"]:
-    all_outputs.append(get_refs_2_outputs)
-    
+if config["download_references"]:
+    all_outputs.append(download_refs_outputs)
+
 if config["replace_headers"]:
     all_outputs.append(replace_headers_outputs)
 
@@ -41,11 +42,10 @@ onstart:
 
 
 onsuccess:
-    print("\n--- YES! WE! CAN!!! Tasks complete. ---\n")
+    print("\n--- YES! WE! CAN! \(^o^)/ Tasks complete. ---\n")
     if config.get("1_get_refs_stage2.smk", False):
         shell("find build/download -name '*.fna' -empty -delete || true")
 
 
 onerror:
     print("\n--- No, we can't... An error has occurred. ---\n")
-

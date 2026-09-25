@@ -2,7 +2,7 @@
 import os
 import re
 
-#-------------INPUT LISTS-------------
+# -------------INPUT LISTS-------------
 accessions = []
 if os.path.exists(config["accession_list"]):
     with open(config["accession_list"], "r") as fhin:
@@ -17,7 +17,7 @@ if os.path.exists(config["taxon_list"]):
 
 valid_taxa = []
 for taxon in taxa:
-    path = f"build/acc2taxid/accessions/{taxon}.txt"
+    path = f"build/.bin/accessions/{taxon}.txt"
     if os.path.exists(path):
         with open(path) as fh:
             accession = fh.read().strip()
@@ -26,50 +26,50 @@ for taxon in taxa:
 
 references = accessions + valid_taxa
 
-#-------------WILDCARD CONSTRAINTS-------------
-wildcard_constraints:
-    reference="|".join(re.escape(r) for r in references) if references else "(?!)"
 
-#-------------LIST OUTPUTS-------------
+# -------------WILDCARD CONSTRAINTS-------------
+wildcard_constraints:
+    reference="|".join(re.escape(r) for r in references) if references else "(?!)",
+
+
+# -------------LIST OUTPUTS-------------
 replace_headers_outputs = []
 replace_headers_outputs += expand(
-    "build/download/{reference}_orig.contigs.txt",
-    reference=references
+    "build/.bin/download/{reference}_orig.contigs.txt", reference=references
 )
 replace_headers_outputs += expand(
-    "build/new_headers/{reference}.fna",
-    reference=references
+    "build/new_headers/{reference}.fna", reference=references
 )
 replace_headers_outputs += expand(
-    "logs/orig_headers/{reference}_orig.contigs.log",
-    reference=references
+    "logs/orig_headers/{reference}_orig.contigs.log", reference=references
 )
 replace_headers_outputs += expand(
-    "logs/new_headers/{reference}_new_headers.log",
-    reference=references
+    "logs/new_headers/{reference}_new_headers.log", reference=references
 )
 
-#--------------RULES-------------
+
+# --------------RULES-------------
 rule extract_contigs:
     input:
-        "build/download/{reference}.fna"
+        "build/download/{reference}.fna",
     output:
-        "build/download/{reference}_orig.contigs.txt"
+        "build/.bin/download/{reference}_orig.contigs.txt",
     log:
-        "logs/orig_headers/{reference}_orig.contigs.log"
+        "logs/orig_headers/{reference}_orig.contigs.log",
     shell:
         """
-        awk '/^>/ {{ h=substr($0,2); split(h,a,/[^[:alnum:]_.:-]+/); print a[1]; next }}' "{input}" > "{output}"
-        echo "Original headers extracted from {wildcards.reference} to {output}" > "{log}"
+        awk '/^>/ {{ h=substr($0,2); split(h,a,/[^[:alnum:]_.:-]+/); print a[1]; next }}' "{input}" >"{output}"
+        echo "Original headers extracted from {wildcards.reference} to {output}" >"{log}"
         """
+
 
 rule replace_new_headers:
     input:
-        fasta="build/download/{reference}.fna"
+        fasta="build/download/{reference}.fna",
     output:
-        fasta="build/new_headers/{reference}.fna"
+        fasta="build/new_headers/{reference}.fna",
     log:
-        "logs/new_headers/{reference}_new_headers.log"
+        "logs/new_headers/{reference}_new_headers.log",
     shell:
         """
         awk -v s="{wildcards.reference}" '
@@ -81,6 +81,6 @@ rule replace_new_headers:
             next
         }}
         {{ print }}
-        ' "{input.fasta}" > "{output.fasta}"
-        echo "New headers made for {wildcards.reference} in {output.fasta}" > "{log}"
+        ' "{input.fasta}" >"{output.fasta}"
+        echo "New headers made for {wildcards.reference} in {output.fasta}" >"{log}"
         """

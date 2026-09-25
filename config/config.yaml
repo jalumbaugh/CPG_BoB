@@ -2,22 +2,16 @@
 project_name: "project_name"
 
 # -------------PIPELINE RESOURCES-------------
-# Get References (download and unpack)
+#Set the paths to your input files (these may also be in the output directory).
 accession_list: "/pathto/accession_list.txt"
 taxon_list: "/pathto/taxon_list.txt"
 
 #-------------RULES TO USE-------------
 
-#Run get_references_stage1 by itself first. It will find the best accessions for your taxa in taxon_list. 
-#After it completes, run this in your terminal:
-#     ls -lhrt build/acc2taxid/accessions
-#The files with 0 as their size were not found on NCBI. 
-#If you want, you can head over to https://www.ncbi.nlm.nih.gov/datasets/genome/ to find related references at a higher taxonomic level.
-#Add those reference accessions to your accession_list.txt file before proceeding to get_references_stage2 and the other steps.
-#Finally: DO NOT DELETE the contents of acc2taxid/accessions until you are done with the entire database build.
-get_references_stage1: False
+#Run get_accessions_from_taxa by itself first if you have a taxa_list input. Otherwise, proceed to download_references and beyond. 
+get_accessions_from_taxa: True
 
-get_references_stage2: False
+download_references: False
 
 replace_headers: False
 
