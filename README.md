@@ -80,14 +80,14 @@ GCA_036687305.1
 > If this step fails, you may have accidentally included two taxa which are synonymous or otherwise have the same NCBI accession. You will need to remove all but one of these from your input lists before continuing. The warning report can be found in `logs/acc_from_tax/{project_name}_warnings.txt`.
 
 
-### If you are only using and accession list as input, you may proceed directly to the full pipeline (i.e. `download_references` and onwards).
+### If you are only using an accession list as input:
+* You may proceed directly to the full pipeline (i.e. `download_references` and onwards).
 
 > [!NOTE]
-> If the pipeline hits an unexplained error partway through downloading, try to just run it again: this has occured before when .zip files are very large and internet connections are unstable.
+> If the pipeline hits an unexplained error partway through downloading, try to run it again: this has occured before when .zip files are very large and internet connections are unstable.
 
 > [!WARNING]
-> There is an additional check built into `download_references` that will kill the pipeline and produce the error file `logs/check_duplicate_second_lines/warnings.txt` if mulitple downloaded reference fastas include identical sequences in the first contig. This is to help prevent users from indexing the same reference twice (e.g. a CGA and GCF from the same accession ID). 
-> To fix your build: remove all but one of the duplicated .fna files (you may leave the others in place), remove the duplicate entries from your input lists, and start over from the top of the pipeline.
+> There is an additional check built into `download_references` that will kill the pipeline and produce the error file `logs/check_duplicate_second_lines/warnings.txt` if mulitple downloaded reference fastas include identical sequences in the first contig. This is to help prevent users from indexing the same reference twice (e.g. a CGA and GCF from the same accession ID). <br> To fix your build: remove all but one of the duplicated .fna files (you may leave the others in place), remove the duplicate entries from your input lists, and start over from the top of the pipeline.
 
 
 ## Development Plans
