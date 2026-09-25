@@ -17,3 +17,10 @@ replace_headers: False
 #If you have decided to replace your headers, you must leave replace_headers as True when running build_acc2taxid and build_bowtie_index.
 build_acc2taxid: False
 
+#when you are ready...
+build_bowtie2_index:
+  enabled: False
+  output_dir: "build/index"
+  seed: 19990412
+  bowtie2_threads: 64
+
