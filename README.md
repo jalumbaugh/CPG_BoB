@@ -33,13 +33,13 @@ GCA_036687305.1
 * Put the list paths into your config file under PIPELINE RESOURCES.
 * Mark the rules to want to use as `True`:
     * `get_accessions_from_taxa` searches NCBI for the GenBank reference genome with the highest contig N50 value for each name in your `taxon_list` and pulls its accession number. It will generate a report of the results.
-    *`download_references` downloads and unpacks the files matching the accession IDs provided in your `accession_list` and in the .bin/accessions folder produced by `get_accessions_from_taxa`. This rule also creates a lookup file that lists the taxa included in the download folder, as well as their NCBI accession and taxid values.
-    *`replace_headers` will replace the headers in the downloaded fasta files with the pattern "taxon/reference_contigID".
+    * `download_references` downloads and unpacks the files matching the accession IDs provided in your `accession_list` and in the .bin/accessions folder produced by `get_accessions_from_taxa`. This rule also creates a lookup file that lists the taxa included in the download folder, as well as their NCBI accession and taxid values.
+    * `replace_headers` will replace the headers in the downloaded fasta files with the pattern "taxon/reference_contigID".
         *This rule is optional. If you do not use it, BoB will use the output from `download_references` to build your index.
         *If you do use `replace_headers`, it must remain marked as `True` in the config when running the following steps.
         *Replacing headers is helpful to prevent terminal errors in places where contigIDs may be reused, e.g. when mapping against multiple indexes that may potentially include the same reference fasta multiple times. 
-    *`build_acc2taxid` will create your acc2taxid file, which is needed for programs like ngsLCA to correlate mapped contigs with taxonomy. It will also produce a report that includes the accession ID, taxid, full taxonomic path, and global distribution of each organism in your database based on [GBIF](https://www.gbif.org/).
-    *`build_bowtie_index` is in development!
+    * `build_acc2taxid` will create your acc2taxid file, which is needed for programs like ngsLCA to correlate mapped contigs with taxonomy. It will also produce a report that includes the accession ID, taxid, full taxonomic path, and global distribution of each organism in your database based on [GBIF](https://www.gbif.org/).
+    * `build_bowtie_index` is in development!
 
 ## Running the pipeline
 * To run the pipeline on a local machine, go to the base directory for CPG_BoB and run `snakemake -s workflow/Snakefile --configfile config/config.yaml --directory ../test -c 1 -p`
