@@ -46,9 +46,9 @@ GCA_036687305.1
     
     * `build-preindex_reports` will generate two reports:
         * a report that includes the accession ID, taxid, full taxonomic path, and global distribution of each organism in your database based on [GBIF](https://www.gbif.org/) called `[project_name]_taxonomy_report.tsv`
-        * a report called `[project_name]_bowtie_build_resources.tsv` that will estimate the computational resources needed for bowtie2 build, which you can set in the snakemake profile (profiles/config.yaml). It will also estimate the size of the final index--- make sure you have enough storage space for all the files!
+        * in beta: a report called `[project_name]_bowtie_build_resources.tsv` that will estimate the computational resources needed for bowtie2 build, which you can set in the snakemake profile (profiles/config.yaml). It will also estimate the size of the final index--- make sure you have enough storage space for all the files!
 
-    * `build_bowtie_index` is in development!
+    * `build_bowtie_index` will build your index in the output folder specified. 
 
 ## Running the pipeline
 * To run the pipeline on a local machine, go to the base directory for CPG_BoB and run `snakemake -s workflow/Snakefile --configfile config/config.yaml --directory ../test -c 1 -p`
@@ -66,6 +66,10 @@ GCA_036687305.1
     *  `cd /pathto/CPG_BoB`
     *  `conda activate BoB_env`
     *  `snakemake -s workflow/Snakefile --configfile config/config.yaml -c 1 -p`
+
+* The only rule which does not run locally on the interactive node is `build_bowtie2_index`. Before you run this:
+    * use `[project_name]_bowtie_build_resources.tsv` to help you adjust the SLURM settings in `profiles/default/config.yaml`. 
+    * This feature is still being tested, so adjust your settings with that in mind.
 
 ### If you are using a taxon list (or a taxon AND accession list) as input:
   * First run `get_accessions_from_taxa= True` with all the other rules as `= False` before doing anything else.
@@ -96,7 +100,12 @@ GCA_036687305.1
 
 
 ## Development Plans
-   * Completion of 5_bowtie2_build with parameters for cluster submission
+    * More parameters: 
+        * user settings to adjust how accession IDs are selected for taxon names
+        * more options for how to re-name replaced headers
+    * Stand-alone (simple) tools:
+        * .bed file header conversion tool that uses `[project_name]_header_lookup.tsv` to swap out old headers to match indexes where headers have been replaced
+        * large header handler: You already indexed, but your .sam headers are too large to convert to .bam? This tool will generate a stand-alone header file and mapping script you can use to fix that.  
 
 ## Author
 Jamie Alumbaugh <br>
@@ -107,4 +116,5 @@ Special thanks to NBIS (National Bioinformatics Infrastructure Sweden) for their
 
 The basic github framework of this pipeline is based on [this template](https://github.com/snakemake-workflows/snakemake-workflow-template).
 
-This pipeline was also developed with documentation search and coding assistance from [Snakemake Guru AI](https://snakemake.readthedocs.io/en/stable/#).
+This pipeline was developed with documentation search and coding assistance from [Snakemake Guru AI](https://snakemake.readthedocs.io/en/stable/#) and [Claude Sonnet 5](https://claude.ai/chat/).
+
