@@ -30,8 +30,9 @@ Add your own jobs with --calibration jobs.json:
 Two ways to run this:
   1. CLI:
        python est_index_resources.py /path/to/fna_dir --emit-sbatch
-  2. Snakemake `script:` directive (see bottom of file) — reads snakemake.input[0]
-     as the .fna folder and writes a TSV report to snakemake.output[0].
+  2. Snakemake `script:` directive (see bottom of file) — reads every path in
+     snakemake.input as an individual .fna file (e.g. from an `expand(...)`
+     list) and writes a TSV report to snakemake.output[0].
 """
 import argparse
 import csv
@@ -44,9 +45,9 @@ FNA_SUFFIXES = (".fna", ".fa", ".fasta")
 GIB = 1024 ** 3
 
 # Defaults matching the Dardel "memory" partition profile: whole node granted
-# regardless of requested cpus, ~1760 GiB memory, 7-day (10,080 min) time limit.
+# regardless of requested cpus, ~1760 GiB memory, 5-day (7200 min) time limit.
 DEFAULT_NODE_MEM_GIB = 1760.0
-DEFAULT_MAX_HOURS = 168.0
+DEFAULT_MAX_HOURS = 120.0
 DEFAULT_PARTITION = "memory"
 
 
@@ -69,37 +70,43 @@ DEFAULT_JOBS = [
 # --------------------------------------------------------------------------
 # Scanning helpers
 # --------------------------------------------------------------------------
+# `scan`, `count_sequences`, and `count_contigs` all take an explicit list of
+# .fna/.fa/.fasta file paths — the caller resolves what those paths are,
+# whether that's every file matching a glob under a folder (CLI/`--recursive`)
+# or an already-enumerated list Snakemake handed in via `input:`.
 
-def scan(folder: Path, recursive: bool, gz_factor: float):
-    """Return (n_files, on_disk_bytes, estimated_uncompressed_bytes)."""
+def resolve_folder_files(folder: Path, recursive: bool) -> list[Path]:
+    """CLI helper: find every .fna/.fa/.fasta (optionally .gz) file under a folder."""
     it = folder.rglob("*") if recursive else folder.glob("*")
-    n, disk, est = 0, 0, 0.0
+    files = []
     for p in it:
         if not p.is_file():
             continue
         name = p.name.lower()
-        gz = name.endswith(".gz")
-        base = name[:-3] if gz else name
-        if not base.endswith(FNA_SUFFIXES):
-            continue
+        base = name[:-3] if name.endswith(".gz") else name
+        if base.endswith(FNA_SUFFIXES):
+            files.append(p)
+    return files
+
+
+def scan(files: list[Path], gz_factor: float):
+    """Return (n_files, on_disk_bytes, estimated_uncompressed_bytes)."""
+    n, disk, est = 0, 0, 0.0
+    for p in files:
         size = p.stat().st_size
+        gz = p.name.lower().endswith(".gz")
         n += 1
         disk += size
         est += size * gz_factor if gz else size
     return n, disk, est
 
 
-def count_sequences(folder: Path, recursive: bool):
+def count_sequences(files: list[Path]):
     """Optional slow pass: count '>' records and bases (informational only)."""
     import gzip
-    it = folder.rglob("*") if recursive else folder.glob("*")
     seqs = bases = 0
-    for p in it:
-        name = p.name.lower()
-        base = name[:-3] if name.endswith(".gz") else name
-        if not (p.is_file() and base.endswith(FNA_SUFFIXES)):
-            continue
-        opener = gzip.open if name.endswith(".gz") else open
+    for p in files:
+        opener = gzip.open if p.name.lower().endswith(".gz") else open
         with opener(p, "rt") as fh:
             for line in fh:
                 if line.startswith(">"):
@@ -109,17 +116,12 @@ def count_sequences(folder: Path, recursive: bool):
     return seqs, bases
 
 
-def count_contigs(folder: Path, recursive: bool):
+def count_contigs(files: list[Path]):
     """Fast pass: count '>' header lines only (no base counting)."""
     import gzip
-    it = folder.rglob("*") if recursive else folder.glob("*")
     seqs = 0
-    for p in it:
-        name = p.name.lower()
-        base = name[:-3] if name.endswith(".gz") else name
-        if not (p.is_file() and base.endswith(FNA_SUFFIXES)):
-            continue
-        opener = gzip.open if name.endswith(".gz") else open
+    for p in files:
+        opener = gzip.open if p.name.lower().endswith(".gz") else open
         with opener(p, "rt") as fh:
             for line in fh:
                 if line.startswith(">"):
@@ -182,13 +184,13 @@ def fmt_time(hours: float) -> str:
 # --------------------------------------------------------------------------
 
 def estimate(
-    folder: Path,
+    files: list[Path],
     *,
-    recursive: bool = False,
+    label: str | None = None,
     gz_factor: float = 4.0,
     calibration_path: Path | None = None,
     mem_safety: float = 1.10,
-    time_safety: float = 3.00,
+    time_safety: float = 3.0,
     cpus: int | None = None,
     node_mem_gb: float | None = None,
     max_hours: float | None = None,
@@ -198,14 +200,17 @@ def estimate(
     partition: str | None = None,
     whole_node: bool = True,
 ) -> dict:
-    """Run the folder scan + model fit and return a plain dict of results.
-    node_mem_gb/max_hours/partition fall back to the Dardel "memory"
-    partition's known values when not given. whole_node=True (the default)
-    adds a note that --cpus doesn't need tuning on a partition that grants
-    a whole node regardless of what's requested.
-    Raises SystemExit on bad input (no folder, no matching files)."""
-    if not folder.is_dir():
-        raise SystemExit(f"Not a directory: {folder}")
+    """Run the model fit over an explicit list of .fna/.fa/.fasta files and
+    return a plain dict of results. `label` is just a display string for the
+    report (e.g. the source folder, or a project name) — pass whatever's
+    meaningful for the caller. node_mem_gb/max_hours/partition fall back to
+    the Dardel "memory" partition's known values when not given. whole_node=True
+    (the default) adds a note that --cpus doesn't need tuning on a partition
+    that grants a whole node regardless of what's requested.
+    Raises SystemExit if `files` is empty."""
+    if not files:
+        raise SystemExit("No .fna/.fa/.fasta files given.")
+    files = [Path(f) for f in files]
     if node_mem_gb is None:
         node_mem_gb = DEFAULT_NODE_MEM_GIB
     if max_hours is None:
@@ -244,7 +249,7 @@ def estimate(
         core_a, core_b = 0.0, (sum(avg_cores) / len(avg_cores) if avg_cores else 32.0)
         core_desc = f"{core_b:.1f} cores (flat, insufficient data to fit a trend)"
 
-    n, disk, est = scan(folder, recursive, gz_factor)
+    n, disk, est = scan(files, gz_factor)
     if n == 0:
         raise SystemExit("No .fna/.fa/.fasta files found.")
     input_gb = est / GIB
@@ -258,14 +263,14 @@ def estimate(
 
     n_seqs = n_bases = None
     if count_seqs:
-        n_seqs, n_bases = count_sequences(folder, recursive)
+        n_seqs, n_bases = count_sequences(files)
 
     n_contigs = contigs
     index_gb = None
     index_model_desc = None
     if idx_a is not None:
         if n_contigs is None and not no_contig_count:
-            n_contigs = count_contigs(folder, recursive)
+            n_contigs = count_contigs(files)
         if n_contigs is not None:
             index_gb = idx_a * input_gb + idx_d * (n_contigs / 1e6)
             index_model_desc = f"{idx_a:.2f} GiB/GiB input + {idx_d:.3f} GiB/M contigs"
@@ -311,8 +316,15 @@ def estimate(
         notes.append(("index", "INFO", "Check free disk space at the output path before running "
                                         "bowtie2-build --large-index."))
 
+    if label is None:
+        try:
+            import os
+            label = os.path.commonpath([str(f) for f in files]) if len(files) > 1 else str(files[0])
+        except ValueError:
+            label = f"{len(files)} input files"
+
     return {
-        "folder": str(folder),
+        "folder": label,
         "n_files": n,
         "on_disk_gib": disk / GIB,
         "input_gib": input_gb,
@@ -467,9 +479,13 @@ def main():
                     help="also write the estimate as a TSV report to this path")
     args = ap.parse_args()
 
+    files = resolve_folder_files(args.folder, args.recursive)
+    if not files:
+        raise SystemExit(f"No .fna/.fa/.fasta files found under {args.folder}")
+
     r = estimate(
-        args.folder,
-        recursive=args.recursive,
+        files,
+        label=str(args.folder),
         gz_factor=args.gz_factor,
         calibration_path=args.calibration,
         mem_safety=args.mem_safety,
@@ -488,11 +504,12 @@ def main():
         write_tsv(r, args.output)
 
 def run_from_snakemake(snakemake) -> None:
-    input_path = Path(snakemake.input[0]).expanduser()
+    input_files = [Path(f).expanduser() for f in snakemake.input]
     output_path = Path(snakemake.output[0]).expanduser()
 
-    if not input_path.exists():
-        raise SystemExit(f"Input folder not found: {input_path}")
+    missing = [f for f in input_files if not f.exists()]
+    if missing:
+        raise SystemExit(f"Input file(s) not found: {', '.join(str(f) for f in missing)}")
 
     params = getattr(snakemake, "params", {})
 
@@ -504,12 +521,12 @@ def run_from_snakemake(snakemake) -> None:
 
     calibration = p("calibration", None)
     r = estimate(
-        input_path,
-        recursive=p("recursive", False),
+        input_files,
+        label=p("label", None),
         gz_factor=p("gz_factor", 4.0),
         calibration_path=Path(calibration) if calibration else None,
         mem_safety=p("mem_safety", 1.10),
-        time_safety=p("time_safety", 3.00),
+        time_safety=p("time_safety", 3.0),
         cpus=p("cpus", None),
         node_mem_gb=p("node_mem_gb", None),
         max_hours=p("max_hours", None),

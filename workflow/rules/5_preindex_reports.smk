@@ -16,9 +16,9 @@ build_preindex_reports_outputs += expand(
 
 # -------------CHOOSE REFERENCE FASTA SOURCE-------------
 if config["replace_headers"]:
-    ref_fasta_dir = "build/new_headers"
+    ref_fasta_inputs = expand("build/new_headers/{reference}.fna", reference=references)
 else:
-    ref_fasta_dir = "build/download"
+    ref_fasta_inputs = expand("build/download/{reference}.fna", reference=references)
 
 # -------------RULES-------------
 rule taxonomy_report:
@@ -33,10 +33,8 @@ rule taxonomy_report:
 
 
 rule est_index_resources:
-    localrule: 
-        True
     input:
-        ref_fasta_dir,
+        ref_fasta_inputs
     output:
         "build/reports/{project_name}_bowtie_build_resources.tsv",
     script:

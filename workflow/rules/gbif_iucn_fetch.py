@@ -1,6 +1,5 @@
 import argparse
 import csv
-import json
 import re
 import sys
 import time
@@ -10,8 +9,6 @@ import requests
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 
-IUCN_SEARCH = "https://www.iucnredlist.org/search"
-IUCN_SPECIES = "https://www.iucnredlist.org/species/{slug}"
 GBIF_SPECIES_MATCH = "https://api.gbif.org/v1/species/match"
 GBIF_SPECIES = "https://api.gbif.org/v1/species/{key}"
 GBIF_OCCURRENCES = "https://api.gbif.org/v1/occurrence/search"
@@ -57,8 +54,7 @@ CODE_TO_COUNTRY = {
     "TM": "Turkmenistan", "TV": "Tuvalu", "UG": "Uganda", "UA": "Ukraine", "AE": "United Arab Emirates",
     "GB": "United Kingdom", "US": "United States", "UY": "Uruguay", "UZ": "Uzbekistan",
     "VU": "Vanuatu", "VE": "Venezuela", "VN": "Vietnam", "YE": "Yemen", "ZM": "Zambia", "ZW": "Zimbabwe",
-    "EH": "Western Sahara", "EU": "Europe", "AS": "Asia", "AF": "Africa", "NA": "North America",
-    "SA": "South America", "OC": "Oceania", "AQ": "Antarctica"
+    "EH": "Western Sahara", "AQ": "Antarctica"
 }
 
 session = requests.Session()
@@ -97,99 +93,6 @@ def extract_rank_value(taxon, rank: str):
                     return str(value)
 
     return ""
-
-
-def iucn_species_lookup(scientific_name: str):
-    headers = {
-        "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36"
-    }
-    try:
-        response = session.get(
-            IUCN_SEARCH,
-            params={"query": scientific_name, "searchType": "species"},
-            headers=headers,
-            timeout=REQUEST_TIMEOUT,
-        )
-        if response.status_code == 403:
-            print(f"IUCN blocked request for {scientific_name}: Cloudflare challenge returned 403", file=sys.stderr)
-            return {}
-        response.raise_for_status()
-        html = response.text
-
-        next_data_match = re.search(r"<script[^>]*id=[\"']__NEXT_DATA__[\"'][^>]*>(.*?)</script>", html, re.S)
-        if next_data_match:
-            payload = json.loads(next_data_match.group(1))
-            for candidate in [payload, payload.get("props", {}), payload.get("props", {}).get("pageProps", {}), payload.get("pageProps", {})]:
-                if not isinstance(candidate, dict):
-                    continue
-                text = json.dumps(candidate)
-                if scientific_name.lower() in text.lower() or "scientificName" in text:
-                    return candidate
-
-        species_match = re.search(r"/species/([A-Za-z0-9_\-]+)", html)
-        if not species_match:
-            return {}
-
-        slug = species_match.group(1)
-        detail_page = session.get(IUCN_SPECIES.format(slug=slug), headers=headers, timeout=REQUEST_TIMEOUT)
-        if detail_page.status_code == 403:
-            print(f"IUCN blocked detail request for {scientific_name}: Cloudflare challenge returned 403", file=sys.stderr)
-            return {}
-        detail_page.raise_for_status()
-        detail_html = detail_page.text
-        detail_match = re.search(r"<script[^>]*id=[\"']__NEXT_DATA__[\"'][^>]*>(.*?)</script>", detail_html, re.S)
-        if detail_match:
-            payload = json.loads(detail_match.group(1))
-            return payload
-        return {"class": "", "order": "", "family": ""}
-    except requests.exceptions.RequestException as exc:
-        print(f"IUCN lookup failed for {scientific_name}: {exc}", file=sys.stderr)
-        return {}
-
-
-def iucn_country_codes_from_html(html: str):
-    codes = set()
-    for pattern in [
-        r'(?i)country(?:\s*code)?\s*[:=]\s*["\']?([A-Z]{2})["\']?',
-        r'(?i)distribution[^\n]{0,200}?\b([A-Z]{2})\b',
-        r'(?i)range[^\n]{0,200}?\b([A-Z]{2})\b',
-    ]:
-        for match in re.findall(pattern, html):
-            code = match.strip()
-            if re.fullmatch(r"[A-Z]{2}", code):
-                codes.add(code)
-    return "; ".join(sorted(codes))
-
-
-def iucn_country_scrape_from_web(scientific_name: str):
-    headers = {
-        "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36"
-    }
-    try:
-        response = session.get(
-            IUCN_SEARCH,
-            params={"query": scientific_name, "searchType": "species"},
-            headers=headers,
-            timeout=REQUEST_TIMEOUT,
-        )
-        if response.status_code == 403:
-            print(f"IUCN blocked country lookup for {scientific_name}: Cloudflare challenge returned 403", file=sys.stderr)
-            return ""
-        response.raise_for_status()
-        html = response.text
-        species_match = re.search(r"/species/([A-Za-z0-9_\-]+)", html)
-        if not species_match:
-            return ""
-        detail_url = IUCN_SPECIES.format(slug=species_match.group(1))
-        detail_page = session.get(detail_url, headers=headers, timeout=REQUEST_TIMEOUT)
-        if detail_page.status_code == 403:
-            print(f"IUCN blocked detail page lookup for {scientific_name}: Cloudflare challenge returned 403", file=sys.stderr)
-            return ""
-        detail_page.raise_for_status()
-        return iucn_country_codes_from_html(detail_page.text)
-    except requests.exceptions.RequestException as exc:
-        print(f"IUCN country lookup failed for {scientific_name}: {exc}", file=sys.stderr)
-        return ""
 
 
 def gbif_species_lookup(scientific_name: str):
@@ -280,47 +183,8 @@ def gbif_country_codes_from_records(taxon_key: int, max_pages: int = 3, page_siz
     return "; ".join(sorted(codes))
 
 
-def gbif_country_scrape_from_web(scientific_name: str):
-    headers = {
-        "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36"
-    }
-    try:
-        search_page = session.get(
-            "https://www.gbif.org/species/search",
-            params={"q": scientific_name},
-            headers=headers,
-            timeout=REQUEST_TIMEOUT,
-        )
-        search_page.raise_for_status()
-        match = re.search(r"/species/([A-Za-z0-9]+)", search_page.text)
-        if not match:
-            return ""
-
-        taxon_url = f"https://www.gbif.org/species/{match.group(1)}"
-        taxon_page = session.get(taxon_url, headers=headers, timeout=REQUEST_TIMEOUT)
-        taxon_page.raise_for_status()
-        html = taxon_page.text
-        country_codes = re.findall(r'"countryCode"\s*:\s*"([A-Z]{2})"', html)
-        if not country_codes:
-            country_codes = re.findall(r"\b[A-Z]{2}\b", html)
-        return "; ".join(sorted(set(country_codes)))
-    except requests.exceptions.RequestException:
-        return ""
-
-
 def resolve_taxon(scientific_name: str):
-    taxon = iucn_species_lookup(scientific_name)
-    if taxon and any(
-        extract_rank_value(taxon, rank)
-        for rank in ("class", "order", "family")
-    ):
-        return taxon, "iucn"
-
-    gbif_taxon = gbif_species_lookup(scientific_name)
-    if gbif_taxon:
-        return gbif_taxon, "gbif"
-
-    return taxon or {}, "iucn"
+    return gbif_species_lookup(scientific_name) or {}
 
 
 def resolve_taxonomy(taxon):
@@ -352,25 +216,15 @@ def code_list_to_names(codes):
     return "; ".join(names)
 
 
-def resolve_countries(scientific_name: str, taxon: dict, source: str):
+def resolve_countries(taxon: dict):
     if not isinstance(taxon, dict):
         return "", "unknown"
 
     key = taxon.get("key")
-
-    if source == "iucn":
-        countries = iucn_country_scrape_from_web(scientific_name)
-        if countries:
-            return code_list_to_names(countries), "iucn"
-
     if key:
         countries = gbif_country_codes_for_taxon(int(key))
         if countries:
             return code_list_to_names(countries), "gbif"
-
-    gbif_country = gbif_country_scrape_from_web(scientific_name)
-    if gbif_country:
-        return code_list_to_names(gbif_country), "gbif"
 
     return "", "unknown"
 
@@ -419,22 +273,22 @@ def enrich_taxa_file(input_path: Path, output_path: Path | None = None):
 
         genus, species = parse_genus_species(row)
         scientific_name = f"{genus} {species}"
-        taxon, source = resolve_taxon(scientific_name)
+        taxon = resolve_taxon(scientific_name)
 
         class_name, order_name, family_name = resolve_taxonomy(taxon)
-        countries, country_source = resolve_countries(scientific_name, taxon, source)
+        countries, country_source = resolve_countries(taxon)
 
         output_rows.append([assembly_accession, taxonomic_id, class_name, order_name, family_name, genus, species, countries, country_source])
 
-    target = output_path or input_path.with_name(f"{input_path.stem}_iucn.tsv")
+    target = output_path or input_path.with_name(f"{input_path.stem}_gbif.tsv")
     write_rows(target, output_rows)
     print(f"Wrote {len(output_rows)-1} taxa rows to {target}")
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Add class/order/family and IUCN country codes to a genus/species TSV.")
+    parser = argparse.ArgumentParser(description="Add class/order/family and GBIF country names to a genus/species TSV.")
     parser.add_argument("input_tsv", help="TSV containing genus and species columns")
-    parser.add_argument("--output", help="Optional output TSV path; default is <input>_iucn.tsv")
+    parser.add_argument("--output", help="Optional output TSV path; default is <input>_gbif.tsv")
     args = parser.parse_args()
 
     input_path = Path(args.input_tsv).expanduser()
