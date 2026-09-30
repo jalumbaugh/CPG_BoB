@@ -1,4 +1,3 @@
 Lepidocyrtus_curvicollis
 Drosophila_melanogaster
-Sophophora_melanogaster
 Hyla_arborea

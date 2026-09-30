@@ -10,6 +10,8 @@ include: "rules/1_acc_from_taxa.smk"
 include: "rules/2_download_refs.smk"
 include: "rules/3_replace_headers.smk"
 include: "rules/4_acc2taxid_build.smk"
+include: "rules/5_preindex_reports.smk"
+include: "rules/6_bowtie2_index_build.smk"
 
 
 all_outputs = []
@@ -26,7 +28,10 @@ if config["replace_headers"]:
 if config["build_acc2taxid"]:
     all_outputs.append(build_acc2taxid_outputs)
 
-if config["build_bowtie2_index"]:
+if config["build_preindex_reports"]:
+    all_outputs.append(build_preindex_reports_outputs)
+
+if config["build_bowtie2_index"]["enabled"]:
     all_outputs.append(build_bowtie2_index_outputs)
 
 all_outputs = flatten(all_outputs)

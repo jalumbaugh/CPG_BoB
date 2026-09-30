@@ -1,10 +1,10 @@
 # -------------PROJECT NAME------------- 
-project_name: "project_name"
+project_name: "BoB_test"
 
 # -------------PIPELINE RESOURCES-------------
-#Set the paths to your input files (these may also be in the output directory).
-accession_list: "full_path/to/accession_list.txt"
-taxon_list: "full_path/to/taxon_list.txt"
+#Set the full paths to your input files (these may also be in the output directory).
+accession_list: "full_path/to/.test/accession_list.txt"
+taxon_list: "full_path/to/.test/taxon_list.txt"
 
 #-------------RULES TO USE-------------
 
@@ -26,6 +26,7 @@ build_preindex_reports: False
 #Build the index when you are ready!
 build_bowtie2_index:
   enabled: False
-  output_dir: "full_path/to/build/index" #set this to the full path of the output directory
+  output_dir: "full_path/to/.test/build/index" #set this to the full path of the output directory
   seed: 990412
   bowtie2_threads: 64
+

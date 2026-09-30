@@ -43,10 +43,7 @@ build_acc2taxid_outputs += expand(
     "build/.bin/acc2taxid/{project_name}_acc2taxid_lookup.tsv",
     project_name=[config["project_name"]],
 )
-build_acc2taxid_outputs += expand(
-    "build/acc2taxid/{project_name}_taxonomy_report.tsv",
-    project_name=[config["project_name"]],
-)
+
 
 # -------------CHOOSE REFERENCE FASTA SOURCE-------------
 if config["replace_headers"]:
@@ -54,8 +51,10 @@ if config["replace_headers"]:
 else:
     ref_fasta_pattern = "build/download/{reference}.fna"
 
-
+# -------------RULES-------------
 rule list_ref_headers:
+    localrule: 
+        True
     input:
         ref_fasta_pattern,
     output:
@@ -70,6 +69,8 @@ rule list_ref_headers:
 
 # make a list of downloaded accessions for use in 3_acc2taxid_build.smk
 rule lookup_for_acc2taxid:
+    localrule: 
+        True
     input:
         taxon_files=expand("build/.bin/accessions/{taxon}.txt", taxon=taxa),
     output:
@@ -90,6 +91,8 @@ rule lookup_for_acc2taxid:
 
 
 rule add_taxids_accession:
+    localrule: 
+        True
     input:
         headers="build/acc2taxid/{accession}_headers.tsv",
         lookup=f"build/.bin/acc2taxid/{config['project_name']}_acc2taxid_lookup.tsv",
@@ -104,6 +107,8 @@ rule add_taxids_accession:
 
 
 rule add_taxids_taxon:
+    localrule: 
+        True
     input:
         headers="build/acc2taxid/{taxon}_headers.tsv",
         taxon_acc="build/.bin/accessions/{taxon}.txt",
@@ -120,6 +125,8 @@ rule add_taxids_taxon:
 
 
 rule cat_acc2taxid:
+    localrule: 
+        True
     input:
         expand("build/acc2taxid/{reference}_acc2taxid.tsv", reference=references),
     output:
@@ -130,17 +137,5 @@ rule cat_acc2taxid:
         """
         cat {input} | awk -F"\t" 'BEGIN{{OFS="\t"}} {{print $1, $0}}' >{output} 2>{log}
         """
-
-
-rule taxonomy_report:
-    input:
-        "build/.bin/acc2taxid/{project_name}_acc2taxid_lookup.tsv",
-    output:
-        "build/acc2taxid/{project_name}_taxonomy_report.tsv",
-    shell:
-        """
-        python3 "workflow/scripts/gbif_iucn_fetch.py" {input} --output {output}
-        """
-
 
 ruleorder: add_taxids_taxon > add_taxids_accession

@@ -1,0 +1,25 @@
+executor: slurm
+jobs: 12
+
+default-resources:
+  slurm_account: "naiss2026-4-295"
+  slurm_partition: "shared"
+  cpus_per_task: 2
+  runtime: 10
+
+set-resources:
+  build_bowtie2_index:
+    slurm_partition: "memory"
+    cpus_per_task: 33
+    mem_mb: 16475
+    runtime: 30
+    #the time-safety setting in the est_index_resources.py script is currently set to 3x the calculated time for a large margin of error.
+    #For small jobs (≤2 GB total fasta input), I recommend setting runtime to at least 30 minutes.
+
+##SLURM to snakemake settings conversion:
+#SBATCH -A naiss2026-#-### → slurm_account:"naiss2026-#-###"
+#SBATCH --mem=1760GB → mem: "1760GB"    Use either mem/mem_mb or mem_mb_per_cpu, not both!
+#SBATCH -p memory → slurm_partition: "memory"
+#SBATCH --cpus-per-task=128 → cpus_per_task: 128.
+#SBATCH -t 5-00:00:00 → runtime: 7200     Where time is always defined as the number of minutes (1 day = 1440 minutes, 1 hour = 60 minutes).
+#Extra sbatch flags can be passed with slurm_extra (--job-name, --error, --output, etc.)

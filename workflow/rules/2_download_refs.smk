@@ -49,6 +49,8 @@ download_refs_outputs += ["logs/check_duplicate_second_lines/checked.ok"]
 
 # -------------RULES-------------
 rule download_accessions:
+    localrule: 
+        True
     output:
         fna="build/download/{accession}.fna",
         stamp=temp("logs/user_record/timestamped_{accession}.txt"),
@@ -76,6 +78,8 @@ rule download_accessions:
 
 
 rule download_best_acc_for_taxa:
+    localrule: 
+        True
     input:
         accession="build/.bin/accessions/{taxon}.txt",
     output:
@@ -112,6 +116,8 @@ ruleorder: download_best_acc_for_taxa > download_accessions
 
 
 rule check_duplicate_second_lines:
+    localrule: 
+        True
     input:
         expand("build/download/{accession}.fna", accession=accessions),
         expand("build/download/{taxon}.fna", taxon=valid_taxa),

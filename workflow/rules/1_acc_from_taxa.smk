@@ -18,15 +18,18 @@ wildcard_constraints:
 
 # -------------LIST OUTPUTS-------------
 acc_from_taxa_outputs = []
-acc_from_taxa_outputs += expand("build/.bin/accessions/{taxon}.txt", taxon=taxa)
+acc_from_taxa_outputs += expand("build/.bin/accessions/{taxon}.txt", taxon=taxa
+)
 acc_from_taxa_outputs += expand(
-    "build/acc2taxid/{project_name}_accfromtax_report.tsv",
+    "build/reports/{project_name}_accfromtax_report.tsv",
     project_name=[config["project_name"]],
 )
 
 
 # -------------RULES-------------
 rule select_best_acc_from_taxa:
+    localrule: 
+        True
     output:
         "build/.bin/accessions/{taxon}.txt",
     log:
@@ -52,10 +55,12 @@ rule select_best_acc_from_taxa:
 
 
 rule acc_from_taxa_report:
+    localrule: 
+        True
     input:
         expand("build/.bin/accessions/{taxon}.txt", taxon=taxa),
     output:
-        "build/acc2taxid/{project_name}_accfromtax_report.tsv",
+        "build/reports/{project_name}_accfromtax_report.tsv",
     log:
         "logs/acc_from_tax/{project_name}_warnings.txt",
     shell:

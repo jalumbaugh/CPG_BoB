@@ -1,11 +1,11 @@
 name: BoB_env
-channel-priority: flexible
 channels:
   - conda-forge
   - bioconda
   - nodefaults
 dependencies:
   - snakemake
+  - snakemake-executor-plugin-slurm
   - python=3.13.12
   - gzip=1.14
   - wget=1.21.4

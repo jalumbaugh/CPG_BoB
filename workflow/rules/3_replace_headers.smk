@@ -35,35 +35,56 @@ wildcard_constraints:
 # -------------LIST OUTPUTS-------------
 replace_headers_outputs = []
 replace_headers_outputs += expand(
-    "build/.bin/download/{reference}_orig.contigs.txt", reference=references
-)
-replace_headers_outputs += expand(
     "build/new_headers/{reference}.fna", reference=references
-)
-replace_headers_outputs += expand(
-    "logs/orig_headers/{reference}_orig.contigs.log", reference=references
 )
 replace_headers_outputs += expand(
     "logs/new_headers/{reference}_new_headers.log", reference=references
 )
-
+replace_headers_outputs += expand(
+    "build/.bin/new_headers/{reference}_header_lookup.tsv", reference=references
+)
+replace_headers_outputs += expand(
+    "build/reports/{project_name}_header_lookup.tsv",
+    project_name=[config["project_name"]],
+)
 
 # --------------RULES-------------
-rule extract_contigs:
+
+rule GENEX_lookup_refs:
+    localrule: 
+        True
     input:
-        "build/download/{reference}.fna",
+        fasta="build/download/{reference}.fna",
     output:
-        "build/.bin/download/{reference}_orig.contigs.txt",
-    log:
-        "logs/orig_headers/{reference}_orig.contigs.log",
+        "build/.bin/new_headers/{reference}_header_lookup.tsv",
     shell:
         """
-        awk '/^>/ {{ h=substr($0,2); split(h,a,/[^[:alnum:]_.:-]+/); print a[1]; next }}' "{input}" >"{output}"
-        echo "Original headers extracted from {wildcards.reference} to {output}" >"{log}"
+        awk -v s="{wildcards.reference}" '
+        /^>/ {{
+            header = substr($0,2)
+            split(header, a, /[[:space:]]+/)
+            contig = a[1]
+            print contig "\t" s "_" contig
+            next
+        }}
+        ' "{input.fasta}" >"{output}"
         """
 
+rule cat_GENEX_lookup:
+    localrule: 
+        True
+    input: 
+        expand("build/.bin/new_headers/{reference}_header_lookup.tsv", reference=references),
+    output:
+        "build/reports/{project_name}_header_lookup.tsv",
+    shell:
+        """
+        cat {input} > {output}
+        """
 
 rule replace_new_headers:
+    localrule: 
+        True
     input:
         fasta="build/download/{reference}.fna",
     output:

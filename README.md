@@ -32,16 +32,21 @@ GCA_036687305.1
 * Put the list paths into your config file under PIPELINE RESOURCES.
 * Mark the rules to want to use as `True`:
 
-    * `get_accessions_from_taxa` searches NCBI for the GenBank reference genome with the highest contig N50 value for each name in your `taxon_list` and pulls its accession number. It will generate a report of the results.
+    * `get_accessions_from_taxa` searches NCBI for the GenBank reference genome with the highest contig N50 value for each name in your `taxon_list` and pulls its accession number. It will generate a report of the results called `[project_name]_accfromtax_report.tsv` that tells you which accession ID was selected for each taxon.
 
-    * `download_references` downloads and unpacks the files matching the accession IDs provided in your `accession_list` and in the .bin/accessions folder produced by `get_accessions_from_taxa`. This rule also creates a lookup file that lists the taxa included in the download folder, as well as their NCBI accession and taxid values.
+    * `download_references` downloads and unpacks the files matching the accession IDs provided in your `accession_list` and in the .bin/accessions folder produced by `get_accessions_from_taxa`. 
 
     * `replace_headers` will replace the headers in the downloaded fasta files with the pattern "taxon/reference_contigID".
-        * This rule is optional. If you do not use it, BoB will use the output from `download_references` to build your index.
-        * If you do use `replace_headers`, it must remain marked as `True` in the config when running the following steps.
-        * Replacing headers is helpful to prevent terminal errors in places where contigIDs may be reused, e.g. when mapping against multiple indexes that may potentially include the same reference fasta multiple times. 
+        * <b>This rule is optional. If you do not use it, BoB will use the output from `download_references` to build your index.</b>
+        * If you do use `replace_headers`, it must remain marked as `True` in the config when running all steps that follow it.
+        * Replacing headers is helpful to prevent terminal mapping errors in places where contigIDs may be reused, e.g. when mapping against multiple indexes that may potentially include the same reference fasta multiple times. It is also useful when the header lines themselves are too long, causing the [header section of the post-mapping .sam files to exceed 2GB and become unable to be coerced into a .bam file](https://github.com/samtools/htslib/issues/1420). The same problem occurs when the headers are short but are many... in which case you will need another solution (forthcoming in this pipeline).
+        * This part of the pipeline will also generate a report called `[project_name]_header_lookup.tsv`, where the first column is the original header name, and the second is the new header. This file is very useful to keep around, particularly if you have generated .bed files (such as with the [GENEX pipeline](https://github.com/NikolayOskolkov/MCWorkflow) or [metaJAM](https://github.com/NathanACO/metaJAM)) based on the original header names and need to swap them out for the new headers.
 
-    * `build_acc2taxid` will create your acc2taxid file, which is needed for programs like ngsLCA to correlate mapped contigs with taxonomy. It will also produce a report that includes the accession ID, taxid, full taxonomic path, and global distribution of each organism in your database based on [GBIF](https://www.gbif.org/).
+    * `build_acc2taxid` will create your acc2taxid file, which is needed for programs like ngsLCA to correlate mapped contigs with taxonomy. 
+    
+    * `build-preindex_reports` will generate two reports:
+        * a report that includes the accession ID, taxid, full taxonomic path, and global distribution of each organism in your database based on [GBIF](https://www.gbif.org/) called `[project_name]_taxonomy_report.tsv`
+        * a report called `[project_name]_bowtie_build_resources.tsv` that will estimate the computational resources needed for bowtie2 build, which you can set in the snakemake profile (profiles/config.yaml). It will also estimate the size of the final index--- make sure you have enough storage space for all the files!
 
     * `build_bowtie_index` is in development!
 

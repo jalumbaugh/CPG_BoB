@@ -10,7 +10,6 @@ import requests
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 
-
 IUCN_SEARCH = "https://www.iucnredlist.org/search"
 IUCN_SPECIES = "https://www.iucnredlist.org/species/{slug}"
 GBIF_SPECIES_MATCH = "https://api.gbif.org/v1/species/match"
@@ -446,5 +445,39 @@ def main():
     enrich_taxa_file(input_path, output_path)
 
 
-if __name__ == "__main__":
+# --------------------------------------------------------------------------
+# Snakemake entry point
+# --------------------------------------------------------------------------
+# Used when this file is invoked via a Snakemake rule's `script:` directive,
+# e.g.:
+#
+#   rule taxonomy_report:
+#       input:
+#           "build/.bin/acc2taxid/{project_name}_acc2taxid_lookup.tsv",
+#       output:
+#           "build/reports/{project_name}_taxonomy_report.tsv",
+#       script:
+#           "gbif_iucn_fetch.py"
+#
+# Snakemake execs this script with a `snakemake` object injected as a global,
+# so the block below only runs under Snakemake and is skipped for normal CLI use.
+
+def run_from_snakemake(snakemake) -> None:
+    input_path = Path(snakemake.input[0]).expanduser()
+    output_path = Path(snakemake.output[0]).expanduser()
+
+    if not input_path.exists():
+        raise SystemExit(f"File not found: {input_path}")
+
+    enrich_taxa_file(input_path, output_path)
+
+
+try:
+    snakemake  # noqa: F821 — injected by Snakemake's `script:` directive
+except NameError:
+    snakemake = None
+
+if snakemake is not None:
+    run_from_snakemake(snakemake)
+elif __name__ == "__main__":
     main()
