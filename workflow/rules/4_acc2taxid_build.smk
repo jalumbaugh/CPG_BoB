@@ -36,7 +36,7 @@ wildcard_constraints:
 # -------------LIST OUTPUTS-------------
 build_acc2taxid_outputs = []
 build_acc2taxid_outputs += expand(
-    "build/acc2taxid/{project_name}_acc2taxid.tsv",
+    "build/acc2taxid/{project_name}_acc2taxid.tsv.gz",
     project_name=[config["project_name"]],
 )
 build_acc2taxid_outputs += expand(
@@ -134,7 +134,20 @@ rule cat_acc2taxid:
         "logs/cat_acc2taxid/{project_name}_acc2taxid_complete.tsv",
     shell:
         """
-        cat {input} | sed 's/ /_/g' | awk -F"\t" 'BEGIN{{OFS="\t"}} {{print $1, $0}}' >{output} 2>{log}
+        cat {input} | sed 's/ /_/g' | awk -F"\t" 'BEGIN{{OFS="\t"}} {{print $1, $0}}' | awk -F"\t" 'BEGIN{{OFS="\t"}} {{sub(/\..*$/, "", $1); print}}' > {output} 2>{log}
+        """
+
+rule zip_acc2taxid:
+    localrule: 
+        True
+    input:
+        "build/acc2taxid/{project_name}_acc2taxid.tsv",
+    output:
+        "build/acc2taxid/{project_name}_acc2taxid.tsv.gz",
+    shell:
+        """
+        gzip -c {input} > {output}
+        rm {input}
         """
 
 ruleorder: add_taxids_taxon > add_taxids_accession
