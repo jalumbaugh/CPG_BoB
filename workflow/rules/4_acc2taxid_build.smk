@@ -123,7 +123,6 @@ rule add_taxids_taxon:
         awk -F"\t" -v acc="$acc" 'BEGIN{{OFS="\t"}} FNR==NR{{if(FNR>1){{taxid[$1]=$2; name[$1]=$3}}; next}} {{print $1, taxid[acc], name[acc]}}' {input.lookup} {input.headers} >{output} 2>{log}
         """
 
-
 rule cat_acc2taxid:
     localrule: 
         True
@@ -135,7 +134,7 @@ rule cat_acc2taxid:
         "logs/cat_acc2taxid/{project_name}_acc2taxid_complete.tsv",
     shell:
         """
-        cat {input} | awk -F"\t" 'BEGIN{{OFS="\t"}} {{print $1, $0}}' >{output} 2>{log}
+        cat {input} | sed 's/ /_/g' | awk -F"\t" 'BEGIN{{OFS="\t"}} {{print $1, $0}}' >{output} 2>{log}
         """
 
 ruleorder: add_taxids_taxon > add_taxids_accession
