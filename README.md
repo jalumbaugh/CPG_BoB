@@ -110,8 +110,8 @@ GCA_036687305.1
         GCA_036687305	GCA_036687305.1_CP136102.1	3656	Cucumis_melo
         Drosophila_melanogaster_AE014298	Drosophila_melanogaster_AE014298.5	7227	Drosophila_melanogaster
         Clunio_CVRI01006194	Clunio_CVRI01006194.1	568069	Clunio_marinus
-      (continued)
-      ```
+        (continued)
+        ```
   * The rule `build_preindex_reports` will generate the report `[project_name]_taxonomy_report.tsv`:
       ```Assembly Accession	Organism Taxonomic ID	class	order	family	genus	species	countries	country_source
       GCA_036971115.1	90675	Magnoliopsida	Brassicales	Brassicaceae	Camelina	sativa	Austria; Belgium; Switzerland (cont.)	gbif
