@@ -102,7 +102,7 @@ GCA_036687305.1
       CP146036.1	GCA_036971115.1_CP146036.1
       CP146037.1	GCA_036971115.1_CP146037.1
       CP146038.1	GCA_036971115.1_CP146038.1
-      [continued]
+      (continued)
       ```
   * For `build_acc2taxid`, the acc2taxid file (`[project_name]_acc2taxid.tsv.gz`) will be compressed and formatted in 4 columns to be compatible with other indexes prepared for use in [metaJAM](https://github.com/NathanACO/metaJAM). Here are some example lines from the file made from the .test input lists: 
         ```
@@ -110,20 +110,15 @@ GCA_036687305.1
         GCA_036687305	GCA_036687305.1_CP136102.1	3656	Cucumis_melo
         Drosophila_melanogaster_AE014298	Drosophila_melanogaster_AE014298.5	7227	Drosophila_melanogaster
         Clunio_CVRI01006194	Clunio_CVRI01006194.1	568069	Clunio_marinus
-      [continued]
+      (continued)
       ```
   * The rule `build_preindex_reports` will generate the report `[project_name]_taxonomy_report.tsv`:
-        ```
-        GCA_036971115	GCA_036971115.1_CP146036.1	90675	Camelina_sativa
-        GCA_036687305	GCA_036687305.1_CP136102.1	3656	Cucumis_melo
-        Drosophila_melanogaster_AE014298	Drosophila_melanogaster_AE014298.5	7227	Drosophila_melanogaster
-        Clunio_CVRI01006194	Clunio_CVRI01006194.1	568069	Clunio_marinus
-      [continued]
       ```Assembly Accession	Organism Taxonomic ID	class	order	family	genus	species	countries	country_source
-GCA_036971115.1	90675	Magnoliopsida	Brassicales	Brassicaceae	Camelina	sativa	Austria; Belgium; Switzerland (cont.)	gbif
-GCA_900005825.1	568069	Insecta	Diptera	Chironomidae	Clunio	marinus	Belgium; Germany; Denmark  (cont.)	gbif
-GCA_036687305.1	3656	Magnoliopsida	Cucurbitales	Cucurbitaceae	Cucumis	melo	United Arab Emirates; Argentina; Austria (cont.)	gbif
-GCA_000001215.4	7227	Insecta	Diptera	Drosophilidae	Drosophila	melanogaster	Argentina; American Samoa; Austria (cont.)	gbif
+      GCA_036971115.1	90675	Magnoliopsida	Brassicales	Brassicaceae	Camelina	sativa	Austria; Belgium; Switzerland (cont.)	gbif
+      GCA_900005825.1	568069	Insecta	Diptera	Chironomidae	Clunio	marinus	Belgium; Germany; Denmark  (cont.)	gbif
+      GCA_036687305.1	3656	Magnoliopsida	Cucurbitales	Cucurbitaceae	Cucumis	melo	United Arab Emirates; Argentina; Austria (cont.)	gbif
+      GCA_000001215.4	7227	Insecta	Diptera	Drosophilidae	Drosophila	melanogaster	Argentina; American Samoa; Austria (cont.)	gbif
+      (continued)
       ```
   * ... as well as `[project_name]_bowtie_build_resources.tsv`:
       ```
