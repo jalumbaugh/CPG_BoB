@@ -50,7 +50,7 @@ onstart:
 
 
 onsuccess:
-    print("\n--- YES! WE! CAN! \(^o^)/ Tasks complete. ---\n")
+    print("\n--- YES! WE! CAN! (^o^) Tasks complete. ---\n")
     if config.get("1_get_refs_stage2.smk", False):
         shell("find build/download -name '*.fna' -empty -delete || true")
 

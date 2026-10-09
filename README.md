@@ -12,7 +12,7 @@ an index building companion in SnakeMake for metagenomic databases
 <b>Build your taxon and/or accession input files</b>
 * you can add any taxon you are interested to your taxon list, as BoB will not fail if no accession exists.
 * the list may include species, genera, families, or higher taxonomic orders.
-* the taxon list should be formatatted like this, with underscores between the genus and species names:
+* the taxon list should be formatted like this, with underscores between the genus and species names:
 ```
 Lepidocyrtus_curvicollis
 Drosophila_melanogaster
