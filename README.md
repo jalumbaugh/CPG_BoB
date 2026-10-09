@@ -104,14 +104,16 @@ GCA_036687305.1
       CP146038.1	GCA_036971115.1_CP146038.1
       (continued)
       ```
+
   * For `build_acc2taxid`, the acc2taxid file (`[project_name]_acc2taxid.tsv.gz`) will be compressed and formatted in 4 columns to be compatible with other indexes prepared for use in [metaJAM](https://github.com/NathanACO/metaJAM). Here are some example lines from the file made from the .test input lists: 
-        ```
-        GCA_036971115	GCA_036971115.1_CP146036.1	90675	Camelina_sativa
-        GCA_036687305	GCA_036687305.1_CP136102.1	3656	Cucumis_melo
-        Drosophila_melanogaster_AE014298	Drosophila_melanogaster_AE014298.5	7227	Drosophila_melanogaster
-        Clunio_CVRI01006194	Clunio_CVRI01006194.1	568069	Clunio_marinus
-        (continued)
-        ```
+      ```
+      GCA_036971115	GCA_036971115.1_CP146036.1	90675	Camelina_sativa
+      GCA_036687305	GCA_036687305.1_CP136102.1	3656	Cucumis_melo
+      Drosophila_melanogaster_AE014298	Drosophila_melanogaster_AE014298.5	7227	Drosophila_melanogaster
+      Clunio_CVRI01006194	Clunio_CVRI01006194.1	568069	Clunio_marinus
+      (continued)
+      ```
+
   * The rule `build_preindex_reports` will generate the report `[project_name]_taxonomy_report.tsv`:
       ```Assembly Accession	Organism Taxonomic ID	class	order	family	genus	species	countries	country_source
       GCA_036971115.1	90675	Magnoliopsida	Brassicales	Brassicaceae	Camelina	sativa	Austria; Belgium; Switzerland (cont.)	gbif
@@ -120,6 +122,7 @@ GCA_036687305.1
       GCA_000001215.4	7227	Insecta	Diptera	Drosophilidae	Drosophila	melanogaster	Argentina; American Samoa; Austria (cont.)	gbif
       (continued)
       ```
+
   * ... as well as `[project_name]_bowtie_build_resources.tsv`:
       ```
       Folder=	build/new_headers
@@ -147,8 +150,8 @@ GCA_036687305.1
       NOTE: Check free disk space at the output path before running bowtie2 build.
 
 	  Note: 1 GiB is outside the calibrated range (68-152 GiB); the estimate is an extrapolation.; [cpus/NOTE] there is no need to set the number of cpus if your HPC grants an entire node on a memory partition.; [index/INFO] Check free disk space at the output path before running bowtie2-build --large-index.
-
       ```
+      
   * Once you are happy with your outputs, enable `build_bowtie2_index` and set the output path. Remember to modify the settings under `profiles/config.yaml` before running the pipeline again.
 
 
