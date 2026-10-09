@@ -16,45 +16,196 @@ REQUEST_TIMEOUT = (10, 120)
 MAX_RETRIES = 5
 
 CODE_TO_COUNTRY = {
-    "AF": "Afghanistan", "AL": "Albania", "DZ": "Algeria", "AD": "Andorra", "AO": "Angola",
-    "AR": "Argentina", "AM": "Armenia", "AU": "Australia", "AT": "Austria", "AZ": "Azerbaijan",
-    "BS": "Bahamas", "BH": "Bahrain", "BD": "Bangladesh", "BB": "Barbados", "BY": "Belarus",
-    "BE": "Belgium", "BZ": "Belize", "BJ": "Benin", "BT": "Bhutan", "BO": "Bolivia",
-    "BA": "Bosnia and Herzegovina", "BW": "Botswana", "BR": "Brazil", "BN": "Brunei",
-    "BG": "Bulgaria", "BF": "Burkina Faso", "BI": "Burundi", "KH": "Cambodia", "CM": "Cameroon",
-    "CA": "Canada", "CV": "Cape Verde", "CF": "Central African Republic", "TD": "Chad",
-    "CL": "Chile", "CN": "China", "CO": "Colombia", "KM": "Comoros", "CG": "Congo",
-    "CR": "Costa Rica", "HR": "Croatia", "CU": "Cuba", "CY": "Cyprus", "CZ": "Czech Republic",
-    "CD": "Democratic Republic of the Congo", "DK": "Denmark", "DJ": "Djibouti", "DM": "Dominica",
-    "DO": "Dominican Republic", "EC": "Ecuador", "EG": "Egypt", "SV": "El Salvador",
-    "GQ": "Equatorial Guinea", "ER": "Eritrea", "EE": "Estonia", "ET": "Ethiopia", "FJ": "Fiji",
-    "FI": "Finland", "FR": "France", "GA": "Gabon", "GM": "Gambia", "GE": "Georgia", "DE": "Germany",
-    "GH": "Ghana", "GR": "Greece", "GD": "Grenada", "GT": "Guatemala", "GN": "Guinea",
-    "GW": "Guinea-Bissau", "GY": "Guyana", "HT": "Haiti", "HN": "Honduras", "HU": "Hungary",
-    "IS": "Iceland", "IN": "India", "ID": "Indonesia", "IR": "Iran", "IQ": "Iraq", "IE": "Ireland",
-    "IL": "Israel", "IT": "Italy", "CI": "Ivory Coast", "JM": "Jamaica", "JP": "Japan",
-    "JO": "Jordan", "KZ": "Kazakhstan", "KE": "Kenya", "KI": "Kiribati", "KW": "Kuwait",
-    "KG": "Kyrgyzstan", "LA": "Laos", "LV": "Latvia", "LB": "Lebanon", "LS": "Lesotho",
-    "LR": "Liberia", "LY": "Libya", "LI": "Liechtenstein", "LT": "Lithuania", "LU": "Luxembourg",
-    "MG": "Madagascar", "MW": "Malawi", "MY": "Malaysia", "MV": "Maldives", "ML": "Mali",
-    "MT": "Malta", "MR": "Mauritania", "MU": "Mauritius", "MX": "Mexico", "MD": "Moldova",
-    "MC": "Monaco", "MN": "Mongolia", "MA": "Morocco", "MZ": "Mozambique", "MM": "Myanmar",
-    "NA": "Namibia", "NR": "Nauru", "NP": "Nepal", "NL": "Netherlands", "NZ": "New Zealand",
-    "NI": "Nicaragua", "NE": "Niger", "NG": "Nigeria", "KP": "North Korea", "NO": "Norway",
-    "OM": "Oman", "PK": "Pakistan", "PW": "Palau", "PA": "Panama", "PG": "Papua New Guinea",
-    "PY": "Paraguay", "PE": "Peru", "PH": "Philippines", "PL": "Poland", "PT": "Portugal",
-    "QA": "Qatar", "RO": "Romania", "RU": "Russia", "RW": "Rwanda", "KN": "Saint Kitts and Nevis",
-    "LC": "Saint Lucia", "VC": "Saint Vincent and the Grenadines", "WS": "Samoa", "SM": "San Marino",
-    "SA": "Saudi Arabia", "SN": "Senegal", "RS": "Serbia", "SC": "Seychelles", "SL": "Sierra Leone",
-    "SG": "Singapore", "SK": "Slovakia", "SI": "Slovenia", "SB": "Solomon Islands", "SO": "Somalia",
-    "ZA": "South Africa", "KR": "South Korea", "SS": "South Sudan", "ES": "Spain", "LK": "Sri Lanka",
-    "SD": "Sudan", "SR": "Suriname", "SE": "Sweden", "CH": "Switzerland", "SY": "Syria",
-    "TW": "Taiwan", "TJ": "Tajikistan", "TZ": "Tanzania", "TH": "Thailand", "TL": "Timor-Leste",
-    "TG": "Togo", "TO": "Tonga", "TT": "Trinidad and Tobago", "TN": "Tunisia", "TR": "Turkey",
-    "TM": "Turkmenistan", "TV": "Tuvalu", "UG": "Uganda", "UA": "Ukraine", "AE": "United Arab Emirates",
-    "GB": "United Kingdom", "US": "United States", "UY": "Uruguay", "UZ": "Uzbekistan",
-    "VU": "Vanuatu", "VE": "Venezuela", "VN": "Vietnam", "YE": "Yemen", "ZM": "Zambia", "ZW": "Zimbabwe",
-    "EH": "Western Sahara", "AQ": "Antarctica"
+    "AF": "Afghanistan",
+    "AL": "Albania",
+    "DZ": "Algeria",
+    "AD": "Andorra",
+    "AO": "Angola",
+    "AR": "Argentina",
+    "AM": "Armenia",
+    "AS": "American Samoa",
+    "AU": "Australia",
+    "AT": "Austria",
+    "AZ": "Azerbaijan",
+    "BS": "Bahamas",
+    "BH": "Bahrain",
+    "BD": "Bangladesh",
+    "BB": "Barbados",
+    "BY": "Belarus",
+    "BE": "Belgium",
+    "BZ": "Belize",
+    "BJ": "Benin",
+    "BT": "Bhutan",
+    "BO": "Bolivia",
+    "BA": "Bosnia and Herzegovina",
+    "BW": "Botswana",
+    "BR": "Brazil",
+    "BN": "Brunei",
+    "BG": "Bulgaria",
+    "BF": "Burkina Faso",
+    "BI": "Burundi",
+    "KH": "Cambodia",
+    "CM": "Cameroon",
+    "CA": "Canada",
+    "CV": "Cape Verde",
+    "CF": "Central African Republic",
+    "TD": "Chad",
+    "CL": "Chile",
+    "CN": "China",
+    "CO": "Colombia",
+    "KM": "Comoros",
+    "CG": "Congo",
+    "CR": "Costa Rica",
+    "HR": "Croatia",
+    "CU": "Cuba",
+    "CY": "Cyprus",
+    "CZ": "Czech Republic",
+    "CD": "Democratic Republic of the Congo",
+    "DK": "Denmark",
+    "DJ": "Djibouti",
+    "DM": "Dominica",
+    "DO": "Dominican Republic",
+    "EC": "Ecuador",
+    "EG": "Egypt",
+    "SV": "El Salvador",
+    "GQ": "Equatorial Guinea",
+    "ER": "Eritrea",
+    "EE": "Estonia",
+    "ET": "Ethiopia",
+    "FJ": "Fiji",
+    "FI": "Finland",
+    "FR": "France",
+    "GA": "Gabon",
+    "GM": "Gambia",
+    "GE": "Georgia",
+    "DE": "Germany",
+    "GH": "Ghana",
+    "GR": "Greece",
+    "GD": "Grenada",
+    "GT": "Guatemala",
+    "GN": "Guinea",
+    "GW": "Guinea-Bissau",
+    "GY": "Guyana",
+    "HT": "Haiti",
+    "HN": "Honduras",
+    "HU": "Hungary",
+    "IS": "Iceland",
+    "IN": "India",
+    "ID": "Indonesia",
+    "IR": "Iran",
+    "IQ": "Iraq",
+    "IE": "Ireland",
+    "IL": "Israel",
+    "IT": "Italy",
+    "CI": "Ivory Coast",
+    "JM": "Jamaica",
+    "JP": "Japan",
+    "JO": "Jordan",
+    "KZ": "Kazakhstan",
+    "KE": "Kenya",
+    "KI": "Kiribati",
+    "KW": "Kuwait",
+    "KG": "Kyrgyzstan",
+    "LA": "Laos",
+    "LV": "Latvia",
+    "LB": "Lebanon",
+    "LS": "Lesotho",
+    "LR": "Liberia",
+    "LY": "Libya",
+    "LI": "Liechtenstein",
+    "LT": "Lithuania",
+    "LU": "Luxembourg",
+    "MG": "Madagascar",
+    "MW": "Malawi",
+    "MY": "Malaysia",
+    "MV": "Maldives",
+    "ML": "Mali",
+    "MT": "Malta",
+    "MR": "Mauritania",
+    "MU": "Mauritius",
+    "MX": "Mexico",
+    "MD": "Moldova",
+    "MC": "Monaco",
+    "MN": "Mongolia",
+    "MA": "Morocco",
+    "MZ": "Mozambique",
+    "MM": "Myanmar",
+    "NA": "Namibia",
+    "NR": "Nauru",
+    "NP": "Nepal",
+    "NL": "Netherlands",
+    "NZ": "New Zealand",
+    "NI": "Nicaragua",
+    "NE": "Niger",
+    "NG": "Nigeria",
+    "KP": "North Korea",
+    "NO": "Norway",
+    "OM": "Oman",
+    "PK": "Pakistan",
+    "PW": "Palau",
+    "PA": "Panama",
+    "PG": "Papua New Guinea",
+    "PY": "Paraguay",
+    "PE": "Peru",
+    "PH": "Philippines",
+    "PL": "Poland",
+    "PT": "Portugal",
+    "QA": "Qatar",
+    "RO": "Romania",
+    "RU": "Russia",
+    "RW": "Rwanda",
+    "KN": "Saint Kitts and Nevis",
+    "LC": "Saint Lucia",
+    "VC": "Saint Vincent and the Grenadines",
+    "WS": "Samoa",
+    "SM": "San Marino",
+    "SA": "Saudi Arabia",
+    "SN": "Senegal",
+    "RS": "Serbia",
+    "SC": "Seychelles",
+    "SL": "Sierra Leone",
+    "SG": "Singapore",
+    "SK": "Slovakia",
+    "SI": "Slovenia",
+    "SB": "Solomon Islands",
+    "SO": "Somalia",
+    "ZA": "South Africa",
+    "KR": "South Korea",
+    "SS": "South Sudan",
+    "ES": "Spain",
+    "LK": "Sri Lanka",
+    "SD": "Sudan",
+    "SR": "Suriname",
+    "SE": "Sweden",
+    "CH": "Switzerland",
+    "SY": "Syria",
+    "TW": "Taiwan",
+    "TJ": "Tajikistan",
+    "TZ": "Tanzania",
+    "TH": "Thailand",
+    "TL": "Timor-Leste",
+    "TG": "Togo",
+    "TO": "Tonga",
+    "TT": "Trinidad and Tobago",
+    "TN": "Tunisia",
+    "TR": "Turkey",
+    "TM": "Turkmenistan",
+    "TV": "Tuvalu",
+    "UG": "Uganda",
+    "UA": "Ukraine",
+    "AE": "United Arab Emirates",
+    "GB": "United Kingdom",
+    "US": "United States",
+    "UY": "Uruguay",
+    "UZ": "Uzbekistan",
+    "VU": "Vanuatu",
+    "VE": "Venezuela",
+    "VN": "Vietnam",
+    "YE": "Yemen",
+    "ZM": "Zambia",
+    "ZW": "Zimbabwe",
+    "EH": "Western Sahara",
+    "AQ": "Antarctica",
 }
 
 session = requests.Session()
@@ -81,7 +232,11 @@ def extract_rank_value(taxon, rank: str):
                 return value.get("scientificName") or value.get("name") or ""
             return str(value)
 
-    for nested_key in ("classification", "higherClassification", "higherClassificationMap"):
+    for nested_key in (
+        "classification",
+        "higherClassification",
+        "higherClassificationMap",
+    ):
         nested = taxon.get(nested_key)
         if isinstance(nested, dict):
             lowered = {str(k).lower(): v for k, v in nested.items()}
@@ -107,7 +262,9 @@ def gbif_species_lookup(scientific_name: str):
         key = payload.get("speciesKey") or payload.get("usageKey")
         if not key:
             return None
-        taxon_response = session.get(GBIF_SPECIES.format(key=key), timeout=REQUEST_TIMEOUT)
+        taxon_response = session.get(
+            GBIF_SPECIES.format(key=key), timeout=REQUEST_TIMEOUT
+        )
         taxon_response.raise_for_status()
         return taxon_response.json()
     except requests.exceptions.RequestException:
@@ -148,12 +305,17 @@ def gbif_country_codes_for_taxon(taxon_key: int):
                 if codes:
                     return "; ".join(sorted(set(codes)))
     except requests.exceptions.RequestException as exc:
-        print(f"GBIF country facet lookup failed for taxonKey={taxon_key}: {exc}", file=sys.stderr)
+        print(
+            f"GBIF country facet lookup failed for taxonKey={taxon_key}: {exc}",
+            file=sys.stderr,
+        )
 
     return gbif_country_codes_from_records(taxon_key)
 
 
-def gbif_country_codes_from_records(taxon_key: int, max_pages: int = 3, page_size: int = 300):
+def gbif_country_codes_from_records(
+    taxon_key: int, max_pages: int = 3, page_size: int = 300
+):
     codes = set()
     try:
         for page in range(max_pages):
@@ -178,7 +340,10 @@ def gbif_country_codes_from_records(taxon_key: int, max_pages: int = 3, page_siz
             if payload.get("endOfRecords", True):
                 break
     except requests.exceptions.RequestException as exc:
-        print(f"GBIF record-based country lookup failed for taxonKey={taxon_key}: {exc}", file=sys.stderr)
+        print(
+            f"GBIF record-based country lookup failed for taxonKey={taxon_key}: {exc}",
+            file=sys.stderr,
+        )
 
     return "; ".join(sorted(codes))
 
@@ -261,7 +426,19 @@ def enrich_taxa_file(input_path: Path, output_path: Path | None = None):
     # First row is always a header; the third column holds "genus species".
     data_rows = rows[1:]
 
-    output_rows = [["Assembly Accession", "Organism Taxonomic ID", "class", "order", "family", "genus", "species", "countries", "country_source"]]
+    output_rows = [
+        [
+            "Assembly Accession",
+            "Organism Taxonomic ID",
+            "class",
+            "order",
+            "family",
+            "genus",
+            "species",
+            "countries",
+            "country_source",
+        ]
+    ]
     for row in data_rows:
         if not row or all(not cell.strip() for cell in row):
             continue
@@ -278,7 +455,19 @@ def enrich_taxa_file(input_path: Path, output_path: Path | None = None):
         class_name, order_name, family_name = resolve_taxonomy(taxon)
         countries, country_source = resolve_countries(taxon)
 
-        output_rows.append([assembly_accession, taxonomic_id, class_name, order_name, family_name, genus, species, countries, country_source])
+        output_rows.append(
+            [
+                assembly_accession,
+                taxonomic_id,
+                class_name,
+                order_name,
+                family_name,
+                genus,
+                species,
+                countries,
+                country_source,
+            ]
+        )
 
     target = output_path or input_path.with_name(f"{input_path.stem}_gbif.tsv")
     write_rows(target, output_rows)
@@ -286,9 +475,13 @@ def enrich_taxa_file(input_path: Path, output_path: Path | None = None):
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Add class/order/family and GBIF country names to a genus/species TSV.")
+    parser = argparse.ArgumentParser(
+        description="Add class/order/family and GBIF country names to a genus/species TSV."
+    )
     parser.add_argument("input_tsv", help="TSV containing genus and species columns")
-    parser.add_argument("--output", help="Optional output TSV path; default is <input>_gbif.tsv")
+    parser.add_argument(
+        "--output", help="Optional output TSV path; default is <input>_gbif.tsv"
+    )
     args = parser.parse_args()
 
     input_path = Path(args.input_tsv).expanduser()
@@ -315,6 +508,7 @@ def main():
 #
 # Snakemake execs this script with a `snakemake` object injected as a global,
 # so the block below only runs under Snakemake and is skipped for normal CLI use.
+
 
 def run_from_snakemake(snakemake) -> None:
     input_path = Path(snakemake.input[0]).expanduser()
