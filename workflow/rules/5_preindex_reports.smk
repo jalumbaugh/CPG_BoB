@@ -20,22 +20,23 @@ if config["replace_headers"]:
 else:
     ref_fasta_inputs = expand("build/download/{reference}.fna", reference=references)
 
+
 # -------------RULES-------------
 rule taxonomy_report:
-    localrule: 
-        True
     input:
         "build/.bin/acc2taxid/{project_name}_acc2taxid_lookup.tsv",
     output:
         "build/reports/{project_name}_taxonomy_report.tsv",
+    localrule: True
     script:
         "gbif_iucn_fetch.py"
 
 
 rule est_index_resources:
     input:
-        ref_fasta_inputs
+        ref_fasta_inputs,
     output:
         "build/reports/{project_name}_bowtie_build_resources.tsv",
+    localrule: True
     script:
         "est_index_resources.py"
