@@ -14,10 +14,9 @@ an index building companion in SnakeMake for metagenomic databases
 * the list may include species, genera, families, or higher taxonomic orders.
 * the taxon list should be formatted like this, with underscores between the genus and species names:
 ```
-Lepidocyrtus_curvicollis
 Drosophila_melanogaster
-Hyla_arborea
-Hyla
+Clunio_africanus
+Clunio
 ```
 * the accession list should be formatatted like this.
 ```
