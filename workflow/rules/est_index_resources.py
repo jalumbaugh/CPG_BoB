@@ -5,9 +5,11 @@ the .fna files in a folder.
 
 All sizes are binary units (GiB), matching seff and `du -h`.
 
-Built-in calibration: four completed Dardel jobs (256 cores, 1.72 TB node).
+Built-in calibration: five completed Dardel jobs (256 cores, 1.72 TB node) — four
+full-size builds plus one small .test/ smoke-test build (test_index).
 
     job                 input GiB   peak mem GiB   wall h   index GiB   contigs
+    test_index                1.2          8.05      0.34        2.3       25,665
     SE_Plants               67.6          686        10.32      120     2,191,265
     Greenland_Masked       129.0         1444        23.41      249     1,667,698
     NEU_Herps              147.0         1567        28.39      277     1,412,063
@@ -56,6 +58,8 @@ def h(d, hh, m, s):
 
 
 DEFAULT_JOBS = [
+    {"name": "test_index", "input_gb": 1.2, "mem_gb": 8.05, "index_gb": 2.3, "contigs": 25665,
+     "wall_hours": 0.34, "cpu_hours": 7.37625, "cores": 256},
     {"name": "SE_Plants", "input_gb": 67.6, "mem_gb": 686.42, "index_gb": 120.0, "contigs": 2191265,
      "wall_hours": h(0, 10, 19, 26), "cpu_hours": h(12, 16, 56, 20), "cores": 256},
     {"name": "Greenland_Masked", "input_gb": 129.0, "mem_gb": 1.41 * 1024, "index_gb": 249.0, "contigs": 1667698,
