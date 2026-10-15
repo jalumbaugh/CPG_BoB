@@ -38,7 +38,7 @@ GCA_036687305.1
     * `replace_headers` will replace the headers in the downloaded fasta files with the pattern "{reference}_contigID".
         * <b>This rule is optional. If you do not use it, BoB will use the output from `download_references` to build your index.</b>
         * If you do use `replace_headers`, it must remain marked as `True` in the config when running all steps that follow it.
-        * Replacing headers is helpful to prevent terminal mapping errors in places where contigIDs may be reused, e.g. when mapping against multiple indexes that may potentially include the same reference fasta multiple times. It is also useful when the header lines themselves are too long, causing the [header section of the post-mapping .sam files to exceed 2GB and become unable to be coerced into a .bam file](https://github.com/samtools/htslib/issues/1420). The same problem occurs when the headers are short but are many... in which case you will need another solution (forthcoming in this pipeline).
+        * Replacing headers is helpful to prevent terminal mapping errors in places where contigIDs may be reused, e.g. when mapping against multiple indexes that may potentially include the same reference fasta multiple times. It is also useful when the header lines themselves are too long, causing the [header section of the post-mapping .sam files to exceed 2GB and become unable to be coerced into a .bam file](https://github.com/samtools/htslib/issues/1420). The same problem occurs when the headers are short but are many... in which case you will need another solution, which has been already implemented for all indexes passed through [metaJAM](https://github.com/NathanACO/metaJAM).
         * This part of the pipeline will also generate a report called `[project_name]_header_lookup.tsv`, where the first column is the original header name, and the second is the new header. This file is very useful to keep around, particularly if you have generated .bed files (such as with the [GENEX pipeline](https://github.com/NikolayOskolkov/MCWorkflow) or [metaJAM](https://github.com/NathanACO/metaJAM)) based on the original header names and need to swap them out for the new headers.
 
     * `build_acc2taxid` will create and compress your acc2taxid file, which is needed for programs like ngsLCA to correlate mapped contigs with taxonomy. 
@@ -156,12 +156,15 @@ GCA_036687305.1
 
 
 ## Development Plans
-    * More parameters: 
-        * user settings to adjust how accession IDs are selected for taxon names
-        * more options for how to re-name replaced headers
-    * Stand-alone (simple) tools:
-        * .bed file header conversion tool that uses `[project_name]_header_lookup.tsv` to swap out old headers to match indexes where headers have been replaced
-        * large header handler: You already indexed, but your .sam headers are too large to convert to .bam? This tool will generate a stand-alone header file and mapping script you can use to fix that.  
+* More parameters: 
+  * user settings to adjust how accession IDs are selected for taxon names
+  * more options for how to re-name replaced headers
+  * continuous updating of the resource-estimation tool
+  	* addition of a module for [RepeatMasker](https://www.repeatmasker.org/) for masking repeatative regions in reference genomes
+* Stand-alone (simple) tools:
+    * .bed file header conversion tool that uses `[project_name]_header_lookup.tsv` to swap out old headers to match indexes where headers have been replaced
+    * large header handler: You already indexed, but your .sam headers are too large to convert to .bam? This tool will generate a stand-alone header file and mapping script you can use to fix that. 
+		* Note: this problem is already handled in [metaJAM](https://github.com/NathanACO/metaJAM), but this module would generate stand-alone files that users can implement outside the pipeline if desired.
 
 ## Author
 Jamie Alumbaugh <br>
